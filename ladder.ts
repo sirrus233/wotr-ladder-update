@@ -18,6 +18,8 @@ type Competitive =
     | 'Ladder and league (wome)'
     | 'Ladder but I cannot remember the stats'
 
+const BATCH_SIZE_DEFAULT = 5
+
 const DEFAULT_COLOR = '#ffffff' // White
 const TOURNAMENT_COLOR = '#c9daf8' // Blue
 const LEAGUE_COLOR = '#f9b1ff' // Purple
@@ -191,14 +193,24 @@ function update (): void {
   const responseSheet = getSheet('wotr form response')
   const reportSheet = getSheet('WotR Reports')
   const ladderSheet = getSheet('WOTR ladder')
+  const updateSheet = getSheet('Update')
 
   // Google's API is quite slow, so we want to read all the data we need into memory before manipulating and writing
   // it back. For the ladder update, we need all outstanding game form responses, and the ladder itself.
 
+  const batchSizeValue = updateSheet.getRange('C21').getValue() as string | number
+  let batchSize
+  if (batchSizeValue === '') {
+    batchSize = BATCH_SIZE_DEFAULT
+  } else if (typeof batchSizeValue === 'number') {
+    batchSize = batchSizeValue
+  } else {
+    throw new Error(`Unknown batch size: ${batchSizeValue}. Check cell C21 on the UPDATE sheet.`)
+  }
+
   // The report page is simple, a header followed by data rows, with each row representing a game.
-  const numResponses = responseSheet.getLastRow() - 1
   const responseWidth = 47
-  const responseRange = responseSheet.getRange(2, 1, numResponses, responseWidth)
+  const responseRange = responseSheet.getRange(2, 1, batchSize, responseWidth)
   const responseValues = responseRange.getValues()
 
   // The ladder has a header and footer, as well as extraneous information (such as rank and flag) that we don't need
@@ -255,7 +267,7 @@ function update (): void {
   annotationsRange.setValues(annotations)
   reportSheet.sort(3, false)
 
-  responseRange.deleteCells(SpreadsheetApp.Dimension.ROWS)
+  responseSheet.deleteRows(2, batchSize)
 
   const numLadderInserts = wotrLadder.originalEntries.length
   if (newPlayers.size > 0) {
