@@ -20,10 +20,6 @@ type Competitive =
 
 const BATCH_SIZE_DEFAULT = 5
 
-const DEFAULT_COLOR = '#ffffff' // White
-const TOURNAMENT_COLOR = '#c9daf8' // Blue
-const LEAGUE_COLOR = '#f9b1ff' // Purple
-
 const SCORE_BUCKETS = [10, 33, 56, 79, 102, 126, 151, 178, 207, 236, 270, 308, 352, 409, 499, Number.MAX_SAFE_INTEGER]
 const WINNER_HIGHER = [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 const WINNER_LOWER = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
