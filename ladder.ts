@@ -81,16 +81,18 @@ function update (): void {
     return annotation
   })
 
-  const adminFormulas = reportSheet.getRange(3, 50, reports.length, 13).getFormulasR1C1()
+  const adminFormulas = reportSheet.getRange(3, 1, 1, reportSheet.getMaxColumns()).getFormulasR1C1()
 
   reportSheet.insertRowsBefore(3, reports.length)
+
+  const newReportsFullRange = reportSheet.getRange(3, 1, reports.length, reportSheet.getMaxColumns())
+  const formulas = Array(reports.length).fill(adminFormulas[0])
+  newReportsFullRange.setValues(formulas)
+
   const newReportsRange = reportSheet.getRange(3, 3, reports.length, responseWidth)
   newReportsRange.setValues(responseValues)
 
-  const metadataToRange = reportSheet.getRange(3, 50, reports.length, 13)
-  metadataToRange.setValues(adminFormulas)
-
-  const annotationsRange = reportSheet.getRange(3, 63, reports.length, 4)
+  const annotationsRange = reportSheet.getRange(3, reportSheet.getMaxColumns() - 4 + 1, reports.length, 4)
   annotationsRange.setValues(annotations)
 
   reportSheet.sort(3, false)
