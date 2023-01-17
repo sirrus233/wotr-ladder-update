@@ -39,7 +39,18 @@ function getPartitionedValue (key: number, partitions: number[], values: number[
   throw new Error(`The key ${key} does not match any partition boundary. Make sure there is a bucket for every key.`)
 }
 
+export class AnnotatedReport {
+  report: WotrGameReport
+  annotation: number[]
+
+  constructor (report: WotrGameReport, annotation: number[]) {
+    this.report = report
+    this.annotation = annotation
+  }
+}
+
 export class WotrGameReport {
+  row: any[]
   winner: string
   loser: string
   victory: Victory
@@ -47,6 +58,7 @@ export class WotrGameReport {
 
   constructor (row: any[]) {
     // TODO This happily assumes that the types are correct on the parsed data -- bad idea
+    this.row = row
     this.winner = (row[2] as string).trim()
     this.loser = (row[3] as string).trim()
     this.victory = row[5] as Victory
@@ -55,6 +67,10 @@ export class WotrGameReport {
 
   isLadderGame (): boolean {
     return this.competitive.startsWith('Ladder')
+  }
+
+  hasStats (): boolean {
+    return this.competitive !== 'Ladder but I cannot remember the stats'
   }
 
   winningSide (): Side {

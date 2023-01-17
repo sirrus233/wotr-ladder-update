@@ -1,6 +1,7 @@
-import { WotrGameReport, WotrLadder, WotrLadderEntry } from './objects'
+import { AnnotatedReport, WotrGameReport, WotrLadder, WotrLadderEntry } from './objects'
 
 const BATCH_SIZE_DEFAULT = 5
+const RESPONSE_WIDTH = 47
 
 function getSheet (name: string): GoogleAppsScript.Spreadsheet.Sheet {
   const sheet = SpreadsheetApp.getActive().getSheetByName(name)
@@ -10,10 +11,34 @@ function getSheet (name: string): GoogleAppsScript.Spreadsheet.Sheet {
   return sheet
 }
 
+function updateReports (
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  reports: AnnotatedReport[],
+  headers: number,
+  leftPad: number
+): void {
+  const adminFormulas = sheet.getRange(headers + 1, 1, 1, sheet.getMaxColumns()).getFormulasR1C1()
+
+  sheet.insertRowsBefore(headers + 1, reports.length)
+
+  const newReportsFullRange = sheet.getRange(headers + 1, 1, reports.length, sheet.getMaxColumns())
+  const formulas = Array(reports.length).fill(adminFormulas[0])
+  newReportsFullRange.setValues(formulas)
+
+  const newReportsRange = sheet.getRange(headers + 1, leftPad + 1, reports.length, RESPONSE_WIDTH)
+  newReportsRange.setValues(reports.map((report) => report.report.row))
+
+  const annotationsRange = sheet.getRange(headers + 1, sheet.getMaxColumns() - 4 + 1, reports.length, 4)
+  annotationsRange.setValues(reports.map((report) => report.annotation))
+
+  sheet.sort(leftPad + 1, false)
+}
+
 function update (): void {
   // Define the sheets we will read
   const responseSheet = getSheet('wotr form response')
   const reportSheet = getSheet('WotR Reports')
+  const reportSheetWithoutStats = getSheet('Ladder Games with no stats')
   const ladderSheet = getSheet('WOTR ladder')
   const updateSheet = getSheet('Update')
 
@@ -31,8 +56,7 @@ function update (): void {
   }
 
   // The report page is simple, a header followed by data rows, with each row representing a game.
-  const responseWidth = 47
-  const responseRange = responseSheet.getRange(2, 1, batchSize, responseWidth)
+  const responseRange = responseSheet.getRange(2, 1, batchSize, RESPONSE_WIDTH)
   const responseValues = responseRange.getValues()
 
   // The ladder has a header and footer, as well as extraneous information (such as rank and flag) that we don't need
@@ -81,21 +105,17 @@ function update (): void {
     return annotation
   })
 
-  const adminFormulas = reportSheet.getRange(3, 1, 1, reportSheet.getMaxColumns()).getFormulasR1C1()
+  const annotatedReports = reports.map((report, i) => new AnnotatedReport(report, annotations[i]))
+  const reportsWithStats = annotatedReports.filter((report) => report.report.hasStats())
+  const reportsWithoutStats = annotatedReports.filter((report) => !report.report.hasStats())
 
-  reportSheet.insertRowsBefore(3, reports.length)
+  if (reportsWithStats.length > 0) {
+    updateReports(reportSheet, reportsWithStats, 2, 2)
+  }
 
-  const newReportsFullRange = reportSheet.getRange(3, 1, reports.length, reportSheet.getMaxColumns())
-  const formulas = Array(reports.length).fill(adminFormulas[0])
-  newReportsFullRange.setValues(formulas)
-
-  const newReportsRange = reportSheet.getRange(3, 3, reports.length, responseWidth)
-  newReportsRange.setValues(responseValues)
-
-  const annotationsRange = reportSheet.getRange(3, reportSheet.getMaxColumns() - 4 + 1, reports.length, 4)
-  annotationsRange.setValues(annotations)
-
-  reportSheet.sort(3, false)
+  if (reportsWithoutStats.length > 0) {
+    updateReports(reportSheetWithoutStats, reportsWithoutStats, 1, 1)
+  }
 
   responseSheet.deleteRows(2, batchSize)
 
