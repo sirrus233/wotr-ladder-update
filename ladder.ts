@@ -81,12 +81,18 @@ function update (): void {
     return annotation
   })
 
+  const adminFormulas = reportSheet.getRange(3, 50, reports.length, 13).getFormulasR1C1()
+
   reportSheet.insertRowsBefore(3, reports.length)
   const newReportsRange = reportSheet.getRange(3, 3, reports.length, responseWidth)
   newReportsRange.setValues(responseValues)
 
+  const metadataToRange = reportSheet.getRange(3, 50, reports.length, 13)
+  metadataToRange.setValues(adminFormulas)
+
   const annotationsRange = reportSheet.getRange(3, 63, reports.length, 4)
   annotationsRange.setValues(annotations)
+
   reportSheet.sort(3, false)
 
   responseSheet.deleteRows(2, batchSize)
