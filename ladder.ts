@@ -98,15 +98,27 @@ function update (): void {
   const annotations = reports.map((report) => {
     let annotation
     if (report.isLadderGame()) {
-      annotation = [
-        wotrLadder.getEntry(report.winner).gamesPlayed,
-        wotrLadder.getRank(report.winner),
-        wotrLadder.getEntry(report.loser).gamesPlayed,
-        wotrLadder.getRank(report.loser)
-      ]
+      const winnerGamesPlayed = wotrLadder.getEntry(report.winner).gamesPlayed
+      const winnerRank = wotrLadder.getRank(report.winner)
+      const winnerRatingBefore = wotrLadder.getEntry(report.winner).getRating(report.winningSide())
+      const loserGamesPlayed = wotrLadder.getEntry(report.loser).gamesPlayed
+      const loserRank = wotrLadder.getRank(report.loser)
+      const loserRatingBefore = wotrLadder.getEntry(report.loser).getRating(report.losingSide())
       report.process(wotrLadder)
+      const winnerRatingAfter = wotrLadder.getEntry(report.winner).getRating(report.winningSide())
+      const loserRatingAfter = wotrLadder.getEntry(report.loser).getRating(report.losingSide())
+      annotation = [
+        winnerGamesPlayed,
+        winnerRank,
+        winnerRatingBefore,
+        winnerRatingAfter,
+        loserGamesPlayed,
+        loserRank,
+        loserRatingBefore,
+        loserRatingAfter
+      ]
     } else {
-      annotation = [0, 0, 0, 0]
+      annotation = [0, 0, 0, 0, 0, 0, 0, 0]
     }
     return annotation
   })
