@@ -73,7 +73,9 @@ function update (): void {
   // Map the data into some nice data structures, for name-based field querying and efficient lookup of ladder players
   // TODO A little gross / hard to follow. Maybe flat() the name array
   const wotrLadder = new WotrLadder(
-    ladderNameValues.map((name, i) => new WotrLadderEntry(name.concat(ladderDataValues[i])))
+    ladderNameValues
+      .filter((name) => name[0] !== 'NOT ACTIVE PLAYERS')
+      .map((name, i) => new WotrLadderEntry(name.concat(ladderDataValues[i])))
   )
 
   const reports = responseValues.map((row) => new WotrGameReport(row))
@@ -140,7 +142,7 @@ function update (): void {
     wotrLadder.originalEntries.map((entry) => [entry.shadowRating, entry.freeRating, entry.gamesPlayed])
   )
   ladderSheet.getRange(4, 2, numLadderInserts, ladderSheet.getLastColumn()).sort([
-    { column: 4, ascending: false },
+    { column: 30, ascending: false },
     { column: 7, ascending: false }
   ])
 }
