@@ -56,6 +56,10 @@ function update (): void {
   }
 
   // The report page is simple, a header followed by data rows, with each row representing a game.
+  const numReports = responseSheet.getLastRow() - 1
+  if (numReports < batchSize) {
+    batchSize = numReports
+  }
   const responseRange = responseSheet.getRange(2, 1, batchSize, RESPONSE_WIDTH)
   const responseValues = responseRange.getValues()
 
