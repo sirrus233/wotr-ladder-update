@@ -28,7 +28,7 @@ function updateReports (
   const newReportsRange = sheet.getRange(headers + 1, leftPad + 1, reports.length, RESPONSE_WIDTH)
   newReportsRange.setValues(reports.map((report) => report.report.row))
 
-  const annotationsRange = sheet.getRange(headers + 1, sheet.getMaxColumns() - 4 + 1, reports.length, 4)
+  const annotationsRange = sheet.getRange(headers + 1, sheet.getMaxColumns() - 8 + 1, reports.length, 8)
   annotationsRange.setValues(reports.map((report) => report.annotation))
 
   sheet.sort(leftPad + 1, false)
@@ -157,8 +157,9 @@ function update (): void {
   writeLadderDataRange.setValues(
     wotrLadder.originalEntries.map((entry) => [entry.shadowRating, entry.freeRating, entry.gamesPlayed])
   )
-  ladderSheet.getRange(4, 2, numLadderInserts, ladderSheet.getLastColumn()).sort([
-    { column: 30, ascending: false },
-    { column: 7, ascending: false }
-  ])
+  // numLadderInserts + 1 accounts for the NOT ACTIVE PLAYERS header row
+  // ladderSheet.getLastColumn() - 1 accounts for starting from column 2
+  ladderSheet
+    .getRange(4, 2, numLadderInserts + 1, ladderSheet.getLastColumn() - 1)
+    .sort({ column: 30, ascending: false })
 }
