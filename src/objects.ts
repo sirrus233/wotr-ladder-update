@@ -50,13 +50,13 @@ export class AnnotatedReport {
 }
 
 export class WotrGameReport {
-  row: any[]
+  row: unknown[]
   winner: string
   loser: string
   victory: Victory
   competitive: Competitive
 
-  constructor (row: any[]) {
+  constructor (row: unknown[]) {
     // TODO This happily assumes that the types are correct on the parsed data -- bad idea
     this.row = row
     this.winner = (row[2] as string).trim()
@@ -117,7 +117,7 @@ export class WotrLadderEntry {
   freeRating: number
   gamesPlayed: number
 
-  constructor (row: any[]) {
+  constructor (row: unknown[]) {
     // TODO This happily assumes that the types are correct on the parsed data -- bad idea
     this.name = (row[0] as string).trim()
     this.normalizedName = this.name.toLowerCase()
