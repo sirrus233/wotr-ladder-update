@@ -34,7 +34,7 @@ function updateReports (
   sheet.sort(leftPad + 1, false)
 }
 
-function update (): void {
+export function update (): void {
   // Define the sheets we will read
   const responseSheet = getSheet('wotr form response')
   const reportSheet = getSheet('WotR Reports')
