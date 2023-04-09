@@ -1,22 +1,4 @@
-type Side = 'Shadow' | 'Free'
-
-type Victory =
-    | 'Free People Ring'
-    | 'Free People Military'
-    | 'Conceded FP won'
-    | 'Shadow Forces Corruption'
-    | 'Shadow Forces Military'
-    | 'Conceded SP won'
-
-type Competitive =
-    | 'Friendly'
-    | 'Ladder'
-    | 'Ladder and tournament'
-    | 'Ladder and league (general)'
-    | 'Ladder and league (lome)'
-    | 'Ladder and league (TTS)'
-    | 'Ladder and league (wome)'
-    | 'Ladder but I cannot remember the stats'
+import { Competitive, LadderRow, ReportRow, Victory } from './types'
 
 const SCORE_BUCKETS = [10, 33, 56, 79, 102, 126, 151, 178, 207, 236, 270, 308, 352, 409, 499, Number.MAX_SAFE_INTEGER]
 const WINNER_HIGHER = [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
@@ -39,30 +21,20 @@ function getPartitionedValue (key: number, partitions: number[], values: number[
   throw new Error(`The key ${key} does not match any partition boundary. Make sure there is a bucket for every key.`)
 }
 
-export class AnnotatedReport {
-  report: WotrGameReport
-  annotation: number[]
-
-  constructor (report: WotrGameReport, annotation: number[]) {
-    this.report = report
-    this.annotation = annotation
-  }
-}
-
-export class WotrGameReport {
-  row: unknown[]
+export class WotrReport {
+  row: ReportRow
   winner: string
   loser: string
   victory: Victory
   competitive: Competitive
+  annotation: Annotation = [0, 0, 0, 0, 0, 0, 0, 0]
 
-  constructor (row: unknown[]) {
-    // TODO This happily assumes that the types are correct on the parsed data -- bad idea
+  constructor (row: ReportRow) {
     this.row = row
-    this.winner = (row[2] as string).trim()
-    this.loser = (row[3] as string).trim()
-    this.victory = row[5] as Victory
-    this.competitive = row[6] as Competitive
+    this.winner = row[2].trim()
+    this.loser = row[3].trim()
+    this.victory = row[5]
+    this.competitive = row[6]
   }
 
   isLadderGame (): boolean {
@@ -80,35 +52,19 @@ export class WotrGameReport {
   losingSide (): Side {
     return this.winningSide() === 'Shadow' ? 'Free' : 'Shadow'
   }
-
-  process (ladder: WotrLadder): void {
-    const winner = ladder.getEntry(this.winner)
-    const loser = ladder.getEntry(this.loser)
-
-    if (winner === undefined) {
-      throw new Error(`Missing player from ladder: ${this.winner}.`)
-    }
-
-    if (loser === undefined) {
-      throw new Error(`Missing player from ladder: ${this.loser}.`)
-    }
-
-    const winningSide = this.winningSide()
-    const losingSide = this.losingSide()
-    const winnerRating = winner.getRating(winningSide)
-    const loserRating = loser.getRating(losingSide)
-
-    const scoreAdjustments = winnerRating < loserRating ? WINNER_LOWER : WINNER_HIGHER
-    const scoreDiff = Math.abs(winnerRating - loserRating)
-    const scoreAdjustment = getPartitionedValue(scoreDiff, SCORE_BUCKETS, scoreAdjustments)
-
-    winner.gamesPlayed += 1
-    loser.gamesPlayed += 1
-
-    ladder.updateRating(winner.normalizedName, winningSide, winnerRating + scoreAdjustment)
-    ladder.updateRating(loser.normalizedName, losingSide, loserRating - scoreAdjustment)
-  }
 }
+
+type Side = 'Shadow' | 'Free'
+type Annotation = [
+  winnerGamesPlayed: number,
+  winnerRank: number,
+  winnerRatingBefore: number,
+  winnerRatingAfter: number,
+  loserGamesPlayed: number,
+  loserRank: number,
+  loserRatingBefore: number,
+  loserRatingAfter: number
+]
 
 export class WotrLadderEntry {
   name: string
@@ -117,17 +73,24 @@ export class WotrLadderEntry {
   freeRating: number
   gamesPlayed: number
 
-  constructor (row: unknown[]) {
-    // TODO This happily assumes that the types are correct on the parsed data -- bad idea
-    this.name = (row[0] as string).trim()
+  constructor (row: LadderRow) {
+    this.name = row[2].trim()
     this.normalizedName = this.name.toLowerCase()
-    this.shadowRating = row[1] as number
-    this.freeRating = row[2] as number
-    this.gamesPlayed = row[3] as number
+    this.shadowRating = row[4]
+    this.freeRating = row[5]
+    this.gamesPlayed = row[6]
   }
 
   getRating (side: Side): number {
     return side === 'Shadow' ? this.shadowRating : this.freeRating
+  }
+
+  setRating (side: Side, value: number): void {
+    if (side === 'Shadow') {
+      this.shadowRating = value
+    } else {
+      this.freeRating = value
+    }
   }
 
   avgRating (): number {
@@ -151,13 +114,9 @@ export class WotrLadder {
     return this.entryMap.has(normalizedName)
   }
 
-  getEntry (name: string): WotrLadderEntry {
+  getEntry (name: string): WotrLadderEntry | undefined {
     const normalizedName = name.trim().toLowerCase()
-    const entry = this.entryMap.get(normalizedName)
-    if (entry === undefined) {
-      throw new Error(`No entry in ladder for player ${name}`)
-    }
-    return entry
+    return this.entryMap.get(normalizedName)
   }
 
   getRank (name: string): number {
@@ -169,23 +128,56 @@ export class WotrLadder {
     return rank + 1 // +1 accounts for zero-indexing of the array
   }
 
-  addPlayer (name: string): void {
-    const entry = new WotrLadderEntry([name, 500, 500, 0])
+  addPlayer (name: string): WotrLadderEntry {
+    const entry = new WotrLadderEntry([0, '', name, 500, 500, 500, 0])
     this.entries.push(entry)
     this.originalEntries.push(entry)
     this.entryMap.set(entry.normalizedName, entry)
     this.entries.sort((a, b) => b.avgRating() - a.avgRating())
+    return entry
   }
 
-  updateRating (name: string, side: Side, value: number): void {
-    const entry = this.getEntry(name)
+  processReport (report: WotrReport): void {
+    const winner = this.getEntry(report.winner) ?? this.addPlayer(report.winner)
+    const loser = this.getEntry(report.loser) ?? this.addPlayer(report.loser)
 
-    if (side === 'Shadow') {
-      entry.shadowRating = value
-    } else {
-      entry.freeRating = value
-    }
+    const winningSide = report.winningSide()
+    const losingSide = report.losingSide()
 
+    // Pre-game stats, for annotation purposes
+    const oldWinnerGamesPlayed = winner.gamesPlayed
+    const oldWinnerRank = this.getRank(winner.name)
+    const oldWinnerRating = winner.getRating(winningSide)
+
+    const oldLoserGamesPlayed = loser.gamesPlayed
+    const oldLoserRank = this.getRank(loser.name)
+    const oldLoserRating = winner.getRating(losingSide)
+
+    // Calculate the ELO difference
+    const scoreAdjustments = oldWinnerRating < oldLoserRating ? WINNER_LOWER : WINNER_HIGHER
+    const scoreDiff = Math.abs(oldWinnerRating - oldLoserRating)
+    const scoreAdjustment = getPartitionedValue(scoreDiff, SCORE_BUCKETS, scoreAdjustments)
+
+    // Adjust player ratings and re-sort the ladder
+    winner.setRating(winningSide, oldWinnerRating + scoreAdjustment)
+    loser.setRating(losingSide, oldLoserRating - scoreAdjustment)
+    winner.gamesPlayed += 1
+    loser.gamesPlayed += 1
     this.entries.sort((a, b) => b.avgRating() - a.avgRating())
+
+    const newWinnerRating = winner.getRating(winningSide)
+    const newLoserRating = loser.getRating(losingSide)
+
+    const annotation: Annotation = [
+      oldWinnerGamesPlayed,
+      oldWinnerRank,
+      oldWinnerRating,
+      newWinnerRating,
+      oldLoserGamesPlayed,
+      oldLoserRank,
+      oldLoserRating,
+      newLoserRating
+    ]
+    report.annotation = annotation
   }
 }
