@@ -1,15 +1,37 @@
-/** */
+/** Library of helper functions that don't quite fit anywhere else. **/
 
 const DEFAULT_BATCH_SIZE = 25
 
+/**
+ * Prompt the user for a batch size, providing a sensible default. If the prompt is cancelled, or a non-integer
+ * input is given, throw an error.
+ */
 export function queryBatchSize (): number {
   const response = prompt('Please enter a batch size.', DEFAULT_BATCH_SIZE.toString())
+
   if (response === null) {
-    return DEFAULT_BATCH_SIZE
+    throw new Error('Operation cancelled by user.')
   }
-  return parseInt(response)
+
+  const parsedResponse = parseInt(response)
+
+  if (isNaN(parsedResponse)) {
+    throw new Error(`Could not convert ${response} into an integer.`)
+  }
+
+  return parsedResponse
 }
 
+/**
+ * Given a list of numbers describing the right-most boundaries (inclusive) of a set of partitions, a list of values
+ * contained in those partitions, and a lookup key, return the value contained in the partition specified by the key.
+ *
+ * The number of values must match the number of partitions, and the key must match an existing partition, or else an
+ * error will be thrown.
+ *
+ * For example, with partitions [2, 5, 10] and values [1, 2, 3], keys 1-2 yield 1, 3-5 yield 2, and 6-10 yield 3. A key
+ * greater than 10 would yield an error.
+ */
 export function getPartitionedValue (key: number, partitions: number[], values: number[]): number {
   if (partitions.length !== values.length) {
     throw new Error(
@@ -30,6 +52,10 @@ const SCORE_BUCKETS = [10, 33, 56, 79, 102, 126, 151, 178, 207, 236, 270, 308, 3
 const WINNER_HIGHER = [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 const WINNER_LOWER = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
 
+/**
+ * Compute the change in ELO given the ratings of two players, a winner and a loser. ELO is zero-sum, so this function
+ * returns a single value (to be added to the winner's score, and subtracted from the loser's.)
+ */
 export function computeEloDiff (winnerRating: number, loserRating: number): number {
   const scoreAdjustments = winnerRating < loserRating ? WINNER_LOWER : WINNER_HIGHER
   const scoreDiff = Math.abs(winnerRating - loserRating)
