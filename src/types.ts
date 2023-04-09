@@ -13,8 +13,6 @@ const createTypeGuard =
       return parse(value) !== null
     }
 
-const SIDE = ['Shadow', 'Free'] as const
-
 const EXPANSION = ['Base', 'LoME', 'WoME', 'LoME+WoME'] as const
 
 const VICTORY = [
@@ -40,9 +38,6 @@ const COMPETITIVE = [
 const TICK_BOX = [1, ''] as const
 
 const YES_BOX = ['Yes', ''] as const
-
-type Side = (typeof SIDE)[number]
-const isSide = createTypeGuard(unionParser(SIDE))
 
 type Expansion = (typeof EXPANSION)[number]
 const isExpansion = createTypeGuard(unionParser(EXPANSION))
