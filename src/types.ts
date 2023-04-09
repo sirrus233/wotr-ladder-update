@@ -14,6 +14,8 @@ const createTypeGuard =
     }
 
 const EXPANSION = ['Base', 'LoME', 'WoME', 'LoME+WoME'] as const
+const isExpansion = createTypeGuard(unionParser(EXPANSION))
+export type Expansion = (typeof EXPANSION)[number]
 
 const VICTORY = [
   'Free People Ring',
@@ -23,6 +25,8 @@ const VICTORY = [
   'Shadow Forces Military',
   'Conceded SP won'
 ] as const
+const isVictory = createTypeGuard(unionParser(VICTORY))
+export type Victory = (typeof VICTORY)[number]
 
 const COMPETITIVE = [
   'Friendly',
@@ -34,28 +38,18 @@ const COMPETITIVE = [
   'Ladder and league (wome)',
   'Ladder but I cannot remember the stats'
 ] as const
+const isCompetitive = createTypeGuard(unionParser(COMPETITIVE))
+export type Competitive = (typeof COMPETITIVE)[number]
 
 const TICK_BOX = [1, ''] as const
+const isTickBox = createTypeGuard(unionParser(TICK_BOX))
+export type TickBox = (typeof TICK_BOX)[number]
 
 const YES_BOX = ['Yes', ''] as const
-
-type Expansion = (typeof EXPANSION)[number]
-const isExpansion = createTypeGuard(unionParser(EXPANSION))
-
-export type Victory = (typeof VICTORY)[number]
-const isVictory = createTypeGuard(unionParser(VICTORY))
-
-export type Competitive = (typeof COMPETITIVE)[number]
-const isCompetitive = createTypeGuard(unionParser(COMPETITIVE))
-
-type TickBox = (typeof TICK_BOX)[number]
-const isTickBox = createTypeGuard(unionParser(TICK_BOX))
-
-type YesBox = (typeof YES_BOX)[number]
 const isYesBox = createTypeGuard(unionParser(YES_BOX))
+export type YesBox = (typeof YES_BOX)[number]
 
 export const REPORT_ROW_LENGTH = 47
-
 export type ReportRow = [
   timestamp: string,
   turns: number,
@@ -105,7 +99,6 @@ export type ReportRow = [
   ereborFate: TickBox,
   ironHillsFate: TickBox
 ]
-
 export function parseReportRow (val: unknown): ReportRow {
   if (
     Array.isArray(val) &&
@@ -163,10 +156,7 @@ export function parseReportRow (val: unknown): ReportRow {
   throw new Error("This isn't a report row") // FIXME
 }
 
-export const isReportRow = createTypeGuard(parseReportRow)
-
 export const LADDER_ROW_LENGTH = 7
-
 export type LadderRow = [
   rank: number,
   flag: string,
@@ -176,7 +166,6 @@ export type LadderRow = [
   freeRating: number,
   gamesPlayed: number
 ]
-
 export function parseLadderRow (val: unknown): LadderRow {
   if (
     Array.isArray(val) &&
@@ -194,4 +183,15 @@ export function parseLadderRow (val: unknown): LadderRow {
   throw new Error("This isn't a ladder row") // FIXME
 }
 
-export const isLadderRow = createTypeGuard(parseLadderRow)
+export type Side = 'Shadow' | 'Free'
+
+export type Annotation = [
+  winnerGamesPlayed: number,
+  winnerRank: number,
+  winnerRatingBefore: number,
+  winnerRatingAfter: number,
+  loserGamesPlayed: number,
+  loserRank: number,
+  loserRatingBefore: number,
+  loserRatingAfter: number
+]

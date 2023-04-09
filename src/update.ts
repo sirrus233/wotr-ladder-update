@@ -1,15 +1,6 @@
+import { queryBatchSize } from './lib'
 import { WotrReport, WotrLadder, WotrLadderEntry } from './objects'
 import { FormResponseSheet, LadderSheet, ReportSheet, ReportSheetWithoutStats } from './sheets'
-
-const BATCH_SIZE_DEFAULT = 5
-
-function queryBatchSize (): number {
-  const response = prompt('Please enter a batch size.', BATCH_SIZE_DEFAULT.toString())
-  if (response === null) {
-    return BATCH_SIZE_DEFAULT
-  }
-  return parseInt(response)
-}
 
 export function updateWotrLadder (): void {
   const responseSheet = new FormResponseSheet(queryBatchSize())

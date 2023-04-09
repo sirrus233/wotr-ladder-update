@@ -1,25 +1,5 @@
-import { Competitive, LadderRow, ReportRow, Victory } from './types'
-
-const SCORE_BUCKETS = [10, 33, 56, 79, 102, 126, 151, 178, 207, 236, 270, 308, 352, 409, 499, Number.MAX_SAFE_INTEGER]
-const WINNER_HIGHER = [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
-const WINNER_LOWER = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
-
-function getPartitionedValue (key: number, partitions: number[], values: number[]): number {
-  if (partitions.length !== values.length) {
-    throw new Error(`
-    There must be exactly one value in every partition. 
-    There are ${partitions.length} partitions and ${values.length} values.
-    `)
-  }
-
-  for (let i = 0; i < partitions.length; i++) {
-    if (key <= partitions[i]) {
-      return values[i]
-    }
-  }
-
-  throw new Error(`The key ${key} does not match any partition boundary. Make sure there is a bucket for every key.`)
-}
+import { computeEloDiff } from './lib'
+import { Annotation, Competitive, LadderRow, ReportRow, Side, Victory } from './types'
 
 export class WotrReport {
   row: ReportRow
@@ -53,18 +33,6 @@ export class WotrReport {
     return this.winningSide() === 'Shadow' ? 'Free' : 'Shadow'
   }
 }
-
-type Side = 'Shadow' | 'Free'
-type Annotation = [
-  winnerGamesPlayed: number,
-  winnerRank: number,
-  winnerRatingBefore: number,
-  winnerRatingAfter: number,
-  loserGamesPlayed: number,
-  loserRank: number,
-  loserRatingBefore: number,
-  loserRatingAfter: number
-]
 
 export class WotrLadderEntry {
   name: string
@@ -153,14 +121,11 @@ export class WotrLadder {
     const oldLoserRank = this.getRank(loser.name)
     const oldLoserRating = winner.getRating(losingSide)
 
-    // Calculate the ELO difference
-    const scoreAdjustments = oldWinnerRating < oldLoserRating ? WINNER_LOWER : WINNER_HIGHER
-    const scoreDiff = Math.abs(oldWinnerRating - oldLoserRating)
-    const scoreAdjustment = getPartitionedValue(scoreDiff, SCORE_BUCKETS, scoreAdjustments)
+    const scoreChange = computeEloDiff(oldWinnerRating, oldLoserRating)
 
     // Adjust player ratings and re-sort the ladder
-    winner.setRating(winningSide, oldWinnerRating + scoreAdjustment)
-    loser.setRating(losingSide, oldLoserRating - scoreAdjustment)
+    winner.setRating(winningSide, oldWinnerRating + scoreChange)
+    loser.setRating(losingSide, oldLoserRating - scoreChange)
     winner.gamesPlayed += 1
     loser.gamesPlayed += 1
     this.entries.sort((a, b) => b.avgRating() - a.avgRating())
