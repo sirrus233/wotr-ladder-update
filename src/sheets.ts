@@ -9,6 +9,7 @@ import { WotrReport, WotrLadder } from './objects'
 import { LADDER_ROW_LENGTH, LadderRow, REPORT_ROW_LENGTH, ReportRow, parseLadderRow, parseReportRow } from './types'
 
 // A sheet is accessed by its string name. Important sheets are catalogued here.
+const UPDATE_SHEET = 'Update'
 const FORM_RESPONSES_SHEET = 'wotr form response'
 const GAME_REPORTS_SHEET = 'WotR Reports'
 const GAME_REPORTS_WITHOUT_STATS_SHEET = 'Ladder Games with no stats'
@@ -38,6 +39,24 @@ abstract class Sheet {
     }
 
     return this._sheet
+  }
+}
+
+/** Admin settings page for the ladder update */
+export class UpdateSheet extends Sheet {
+  protected readonly _sheetName = UPDATE_SHEET
+  private readonly defaultBatchSize = 25
+
+  /** Get how many reports should be processed in a single batch. */
+  getBatchSize (): number {
+    const batchSizeValue = this.sheet.getRange('C21').getValue() as string | number
+    if (batchSizeValue === '') {
+      return this.defaultBatchSize
+    } else if (typeof batchSizeValue === 'number') {
+      return batchSizeValue
+    } else {
+      throw new Error(`Unknown batch size: ${batchSizeValue}. Check cell C21 on the UPDATE sheet.`)
+    }
   }
 }
 

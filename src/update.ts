@@ -1,12 +1,12 @@
 /** Main entry-point for update. */
-import { queryBatchSize } from './utils'
 import { WotrReport, WotrLadder, WotrLadderEntry } from './objects'
-import { FormResponseSheet, LadderSheet, ReportSheet, ReportSheetWithoutStats } from './sheets'
+import { FormResponseSheet, LadderSheet, ReportSheet, ReportSheetWithoutStats, UpdateSheet } from './sheets'
 
 /** Process reports and update ladder for War of the Ring board game. */
 export function updateWotrLadder (): void {
   // Build sheets
-  const responseSheet = new FormResponseSheet(queryBatchSize())
+  const updateSheet = new UpdateSheet()
+  const responseSheet = new FormResponseSheet(updateSheet.getBatchSize())
   const ladderSheet = new LadderSheet()
   const reportSheet = new ReportSheet()
   const reportSheetWithoutStats = new ReportSheetWithoutStats()

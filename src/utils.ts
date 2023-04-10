@@ -1,27 +1,5 @@
 /** Library of helper functions that don't quite fit anywhere else. **/
 
-const DEFAULT_BATCH_SIZE = 25
-
-/**
- * Prompt the user for a batch size, providing a sensible default. If the prompt is cancelled, or a non-integer
- * input is given, throw an error.
- */
-export function queryBatchSize (): number {
-  const response = prompt('Please enter a batch size.', DEFAULT_BATCH_SIZE.toString())
-
-  if (response === null) {
-    throw new Error('Operation cancelled by user.')
-  }
-
-  const parsedResponse = parseInt(response)
-
-  if (isNaN(parsedResponse)) {
-    throw new Error(`Could not convert ${response} into an integer.`)
-  }
-
-  return parsedResponse
-}
-
 /**
  * Given a list of numbers describing the right-most boundaries (inclusive) of a set of partitions, a list of values
  * contained in those partitions, and a lookup key, return the value contained in the partition specified by the key.
