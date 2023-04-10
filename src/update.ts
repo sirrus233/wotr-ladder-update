@@ -1,5 +1,5 @@
 /** Main entry-point for update. */
-import { queryBatchSize } from './lib'
+import { queryBatchSize } from './utils'
 import { WotrReport, WotrLadder, WotrLadderEntry } from './objects'
 import { FormResponseSheet, LadderSheet, ReportSheet, ReportSheetWithoutStats } from './sheets'
 

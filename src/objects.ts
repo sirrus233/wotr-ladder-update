@@ -3,7 +3,7 @@
  * Sheet API is to read all required data, manipulate it in memory, and then write it back. These objects make the data
  * manipulation tasks easier than dealing with raw data Arrays.
  */
-import { computeEloDiff } from './lib'
+import { computeEloDiff } from './utils'
 import { Annotation, Competitive, LadderRow, ReportRow, Side, Victory } from './types'
 
 /** Representation of a single game report. */
