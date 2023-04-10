@@ -1,12 +1,20 @@
-/* Parser is a function which takes unknown and returns T or null. */
+/**
+ * Type library for deserialization of data read from the spreadsheet.
+ *
+ * Google's APIs return untyped data. Getting cell values is generally type any[][], representing an array of rows
+ * where each row is an array of anything. Since the data in the sheet is structured in a known format, these parsers,
+ * types, and guards let us deal with the data in a strongly typed way.
+ */
+
+/** A function which maps an unknown value to a concretely typed one. */
 type Parser<T> = (val: unknown) => T | null
 
-/* Automatically create a Parser for a type union of literals, given an array of the union variants.  */
+/** Factory function to create a Parser for a type union of literals, given an array of the union's variants.  */
 function unionParser<T> (variants: readonly T[]): Parser<T> {
   return (val: unknown) => (variants.includes(val as T) ? (val as T) : null)
 }
 
-/* createTypeGuard is a function which takes a parser and returns a new function that is a safe type guard for T. */
+/** A function which takes a parser and returns a new function that is a safe type guard for T. */
 const createTypeGuard =
   <T>(parse: Parser<T>) =>
     (value: unknown): value is T => {
@@ -153,7 +161,7 @@ export function parseReportRow (val: unknown): ReportRow {
   ) {
     return val as ReportRow
   }
-  throw new Error("This isn't a report row") // FIXME
+  throw new Error('Failed to create a report row. Check the data in the row for errors.')
 }
 
 export const LADDER_ROW_LENGTH = 7
@@ -180,7 +188,7 @@ export function parseLadderRow (val: unknown): LadderRow {
   ) {
     return val as LadderRow
   }
-  throw new Error("This isn't a ladder row") // FIXME
+  throw new Error('Failed to create a ladder row. Check the data in the row for errors.')
 }
 
 export type Side = 'Shadow' | 'Free'
