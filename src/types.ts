@@ -159,7 +159,11 @@ export function parseReportRow (val: unknown): ReportRow {
     isTickBox(val[45]) &&
     isTickBox(val[46])
   ) {
-    return val as ReportRow
+    const report = val as ReportRow
+    // Remove leading/trailing whitespace from reported winner/loser names
+    report[2] = report[2].trim()
+    report[3] = report[3].trim()
+    return report
   }
   throw new Error('Failed to create a report row. Check the data in the row for errors.')
 }
@@ -186,7 +190,10 @@ export function parseLadderRow (val: unknown): LadderRow {
     typeof val[5] === 'number' &&
     typeof val[6] === 'number'
   ) {
-    return val as LadderRow
+    const entry = val as LadderRow
+    // Remove leading/trailing whitespace from player name
+    entry[2] = entry[2].trim()
+    return entry
   }
   throw new Error('Failed to create a ladder row. Check the data in the row for errors.')
 }
