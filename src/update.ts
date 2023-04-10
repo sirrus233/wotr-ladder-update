@@ -11,7 +11,7 @@ export function updateWotrLadder (): void {
   const reportSheet = new ReportSheet()
   const reportSheetWithoutStats = new ReportSheetWithoutStats()
 
-  // Read sheet data and structure the ladder
+  // Read sheet data and build the ladder
   const reports = responseSheet.readResponses().map((row) => new WotrReport(row))
   const ladderEntries = ladderSheet.readLadder().map((row) => new WotrLadderEntry(row))
   const ladder = new WotrLadder(ladderEntries)
