@@ -33,6 +33,6 @@ export function updateWotrLadder (): void {
   ladderSheet.prepareNewPlayerRows(originalPlayerCount, newPlayerCount)
   ladderSheet.writeLadderEntries(ladder)
 
-  // Delete process form responses
+  // Delete processed form responses
   responseSheet.deleteResponses()
 }
