@@ -171,7 +171,7 @@ export function parseReportRow (val: unknown): ReportRow {
 export const LADDER_ROW_LENGTH = 7
 export type LadderRow = [
   rank: number,
-  flag: string,
+  flag: unknown, // This is a CellImage. Google doesn't seem to publish this type? I couldn't find it.
   name: string,
   rating: number,
   shadowRating: number,
@@ -183,7 +183,7 @@ export function parseLadderRow (val: unknown): LadderRow {
     Array.isArray(val) &&
     val.length === LADDER_ROW_LENGTH &&
     typeof val[0] === 'number' &&
-    typeof val[1] === 'string' &&
+    ((val[1] as string) === 'CellImage' || (val[1] as string)) === '' &&
     typeof val[2] === 'string' &&
     typeof val[3] === 'number' &&
     typeof val[4] === 'number' &&
