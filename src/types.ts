@@ -183,7 +183,7 @@ export function parseLadderRow (val: unknown): LadderRow {
     Array.isArray(val) &&
     val.length === LADDER_ROW_LENGTH &&
     typeof val[0] === 'number' &&
-    ((val[1] as string) === 'CellImage' || (val[1] as string)) === '' &&
+    // No check for va[1]
     typeof val[2] === 'string' &&
     typeof val[3] === 'number' &&
     typeof val[4] === 'number' &&
