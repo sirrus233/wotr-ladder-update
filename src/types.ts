@@ -179,6 +179,11 @@ export type LadderRow = [
   gamesPlayed: number
 ]
 export function parseLadderRow (val: unknown): LadderRow {
+  // Check if a line represents the ladder entry that divides active and inactive players.
+  // This is a bit of a workaround -- this row (and this row only) has a value of '' for shadowRating, freeRating,
+  // and gamesPlayed. Since the row is never *accessed* by the ladder update process, we don't really want to make these
+  // fields nullable. So we just detect the special case and do a blind cast when the row is returned. Technically, this
+  // is a type error...we claim `number` when we really have `string`. But it's the best I've got right now.
   const isNotActiveDivider = (val: unknown): boolean =>
     Array.isArray(val) && val[2] === 'NOT ACTIVE PLAYERS' && val[4] === '' && val[5] === '' && val[6] === ''
 
