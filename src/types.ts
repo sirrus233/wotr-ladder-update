@@ -165,7 +165,7 @@ export function parseReportRow (val: unknown): ReportRow {
     report[3] = report[3].trim()
     return report
   }
-  throw new Error('Failed to create a report row. Check the data in the row for errors.')
+  throw new Error(`Failed to create a report row. Check the data in the row for errors.\n${val as string}`)
 }
 
 export const LADDER_ROW_LENGTH = 7
