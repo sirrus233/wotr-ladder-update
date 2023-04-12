@@ -97,6 +97,10 @@ export class FormResponseSheet extends Sheet {
 
   /** Delete a batch of responses. */
   deleteResponses (): void {
+    if (this._batchSize === 0) {
+      return
+    }
+
     this.sheet.deleteRows(this.HEADERS + 1, this._batchSize)
   }
 }

@@ -179,6 +179,9 @@ export type LadderRow = [
   gamesPlayed: number
 ]
 export function parseLadderRow (val: unknown): LadderRow {
+  const isNotActiveDivider = (val: unknown): boolean =>
+    Array.isArray(val) && val[2] === 'NOT ACTIVE PLAYERS' && val[4] === '' && val[5] === '' && val[6] === ''
+
   if (
     Array.isArray(val) &&
     val.length === LADDER_ROW_LENGTH &&
@@ -186,9 +189,9 @@ export function parseLadderRow (val: unknown): LadderRow {
     // No check for va[1]
     typeof val[2] === 'string' &&
     typeof val[3] === 'number' &&
-    typeof val[4] === 'number' &&
-    typeof val[5] === 'number' &&
-    typeof val[6] === 'number'
+    (typeof val[4] === 'number' || isNotActiveDivider(val)) &&
+    (typeof val[5] === 'number' || isNotActiveDivider(val)) &&
+    (typeof val[6] === 'number' || isNotActiveDivider(val))
   ) {
     const entry = val as LadderRow
     // Remove leading/trailing whitespace from player name
