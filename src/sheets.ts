@@ -62,7 +62,7 @@ export class UpdateSheet extends Sheet {
 
 /** Has the output of the form players use to report their games. This is where games live before they are processed. */
 export class FormResponseSheet extends Sheet {
-  protected readonly _sheetName = LADDER_SHEET
+  protected readonly _sheetName = FORM_RESPONSES_SHEET
   private readonly HEADERS = 1
   /**
    * Form responses are processed in batches, primarily due to legacy behavior where it took a very long time
@@ -103,7 +103,7 @@ export class FormResponseSheet extends Sheet {
 
 /** The ladder that tracks players and their ranks and ratings. */
 export class LadderSheet extends Sheet {
-  protected readonly _sheetName = FORM_RESPONSES_SHEET
+  protected readonly _sheetName = LADDER_SHEET
   private readonly HEADERS = 3
   // Some columns have important semantics
   private readonly FLAG_COL = 2 // Player's national flag

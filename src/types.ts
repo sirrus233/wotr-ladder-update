@@ -195,7 +195,7 @@ export function parseLadderRow (val: unknown): LadderRow {
     entry[2] = entry[2].trim()
     return entry
   }
-  throw new Error('Failed to create a ladder row. Check the data in the row for errors.')
+  throw new Error(`Failed to create a ladder row. Check the data in the row for errors.\n${val as string}`)
 }
 
 export type Side = 'Shadow' | 'Free'
