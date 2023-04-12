@@ -81,6 +81,10 @@ export class FormResponseSheet extends Sheet {
    * batchSize is automatically adjusted down to match the total number of responses.
    */
   readResponses (): ReportRow[] {
+    if (this._batchSize === 0) {
+      return []
+    }
+
     // The sheet is simple, a header followed by data rows, with each row representing a game.
     const numReports = this.sheet.getLastRow() - this.HEADERS
     // Modify the batch size if it is too big
