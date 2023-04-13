@@ -59,7 +59,7 @@ export type YesBox = (typeof YES_BOX)[number]
 
 export const REPORT_ROW_LENGTH = 47
 export type ReportRow = [
-  timestamp: string,
+  timestamp: Date,
   turns: number,
   winner: string,
   loser: string,
@@ -115,8 +115,8 @@ export function parseReportRow (val: unknown): ReportRow {
   if (val.length !== REPORT_ROW_LENGTH) {
     throw new Error(`Error in game report. Expected ${REPORT_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
   }
-  if (typeof val[0] !== 'string') {
-    throw new Error(`Error in game report at field [0]. Expected 'string'. Got ${typeof val[0]}.\n${valStr}`)
+  if (Object.prototype.toString.call(val[0]) !== '[object Date]') {
+    throw new Error(`Error in game report at field [0]. Expected 'Date'. Got ${typeof val[0]}.\n${valStr}`)
   }
   if (typeof val[1] !== 'number') {
     throw new Error(`Error in game report at field [1]. Expected 'number'. Got ${typeof val[1]}.\n${valStr}`)
@@ -293,7 +293,7 @@ export function parseLadderRow (val: unknown): LadderRow {
   if (typeof val[0] !== 'number') {
     throw new Error(`Error in ladder entry at field [0]. Expected 'number'. Got ${typeof val[0]}.\n${valStr}`)
   }
-  // No check for va[1]
+  // No check for val[1]
   if (typeof val[2] !== 'string') {
     throw new Error(`Error in ladder entry at field [2]. Expected 'string'. Got ${typeof val[2]}.\n${valStr}`)
   }
