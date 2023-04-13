@@ -163,9 +163,13 @@ export class WotrLadder {
 
     const oldLoserGamesPlayed = loser.gamesPlayed
     const oldLoserRank = this.getRank(loser.name)
-    const oldLoserRating = winner.getRating(losingSide)
+    const oldLoserRating = loser.getRating(losingSide)
 
     const scoreChange = computeEloDiff(oldWinnerRating, oldLoserRating)
+
+    console.log(`Winner was ${winner.name} playing ${winningSide} with a rating of ${oldWinnerRating}`)
+    console.log(`Loser was ${loser.name} playing ${losingSide} with a rating of ${oldLoserRating}`)
+    console.log(`ELO diff will be ${scoreChange}`)
 
     // Adjust player ratings and re-sort the ladder
     winner.setRating(winningSide, oldWinnerRating + scoreChange)
