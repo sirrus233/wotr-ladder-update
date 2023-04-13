@@ -206,7 +206,7 @@ export class ReportSheet extends Sheet {
     // can just copy the entire row for convenience. Then data and annotations can overwrite their respective ranges
     // within the row.
     // Copy the admin formulas.
-    this.sheet.getRange(this.HEADERS + 1, 1, reports.length, sheetWidth).setValues(formulas)
+    this.sheet.getRange(this.HEADERS + 1, 1, reports.length, sheetWidth).setValues(formulas) // TODO Surprisingly slow?
     // Copy all report data.
     this.sheet
       .getRange(this.HEADERS + 1, this.DATA_START_COL, reports.length, reportWidth)
