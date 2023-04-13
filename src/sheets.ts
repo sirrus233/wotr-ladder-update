@@ -193,6 +193,7 @@ export class ReportSheet extends Sheet {
     const sheetWidth = this.sheet.getMaxColumns()
     const reportWidth = reports[0].row.length
     const annotationWidth = reports[0].annotation.length
+    const annotationStartCol = sheetWidth - annotationWidth + 1 // Account for future admin columns before annotations
     // A row in this sheet is structured as <report data><admin formulas><report annotation>
     // We control the data and annotation, but don't want to touch the admin stuff. We can read the formulas from the
     // top report so we can later copy them over to all the new report rows.
@@ -212,7 +213,7 @@ export class ReportSheet extends Sheet {
       .setValues(reports.map((report) => report.row))
     // Copy annotations.
     this.sheet
-      .getRange(this.HEADERS + 1, sheetWidth - annotationWidth + 1, reports.length, annotationWidth)
+      .getRange(this.HEADERS + 1, annotationStartCol, reports.length, annotationWidth)
       .setValues(reports.map((report) => report.annotation))
     // Sort the sheet by the first data column, which should be Timestamp. Most recent reports should be at the top.
     this.sheet.sort(this.DATA_START_COL, false)
