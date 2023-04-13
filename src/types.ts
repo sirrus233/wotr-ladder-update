@@ -108,64 +108,159 @@ export type ReportRow = [
   ironHillsFate: TickBox
 ]
 export function parseReportRow (val: unknown): ReportRow {
-  if (
-    Array.isArray(val) &&
-    val.length === REPORT_ROW_LENGTH &&
-    typeof val[0] === 'string' &&
-    typeof val[1] === 'number' &&
-    typeof val[2] === 'string' &&
-    typeof val[3] === 'string' &&
-    isExpansion(val[4]) &&
-    isVictory(val[5]) &&
-    isCompetitive(val[6]) &&
-    isYesBox(val[7]) &&
-    isYesBox(val[8]) &&
-    isYesBox(val[9]) &&
-    typeof val[10] === 'string' &&
-    typeof val[11] === 'string' &&
-    typeof val[12] === 'number' &&
-    isTickBox(val[13]) &&
-    typeof val[14] === 'number' &&
-    typeof val[15] === 'number' &&
-    isTickBox(val[16]) &&
-    typeof val[17] === 'number' &&
-    isTickBox(val[18]) &&
-    isTickBox(val[19]) &&
-    isTickBox(val[20]) &&
-    isTickBox(val[21]) &&
-    isTickBox(val[22]) &&
-    isTickBox(val[23]) &&
-    isTickBox(val[24]) &&
-    isTickBox(val[25]) &&
-    isTickBox(val[26]) &&
-    isTickBox(val[27]) &&
-    isTickBox(val[28]) &&
-    isTickBox(val[29]) &&
-    isTickBox(val[30]) &&
-    (typeof val[31] === 'number' || val[31] === '') &&
-    typeof val[32] === 'string' &&
-    typeof val[33] === 'string' &&
-    isTickBox(val[34]) &&
-    isTickBox(val[35]) &&
-    isTickBox(val[36]) &&
-    isTickBox(val[37]) &&
-    isTickBox(val[38]) &&
-    isTickBox(val[39]) &&
-    isTickBox(val[40]) &&
-    isTickBox(val[41]) &&
-    isTickBox(val[42]) &&
-    isTickBox(val[43]) &&
-    isTickBox(val[44]) &&
-    isTickBox(val[45]) &&
-    isTickBox(val[46])
-  ) {
-    const report = val as ReportRow
-    // Remove leading/trailing whitespace from reported winner/loser names
-    report[2] = report[2].trim()
-    report[3] = report[3].trim()
-    return report
+  const valStr = val as string
+  if (!Array.isArray(val)) {
+    throw new Error(`Error in game report. Value is not an array.\n${valStr}`)
   }
-  throw new Error(`Failed to create a report row. Check the data in the row for errors.\n${val as string}`)
+  if (val.length !== REPORT_ROW_LENGTH) {
+    throw new Error(`Error in game report. Expected ${REPORT_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
+  }
+  if (typeof val[0] !== 'string') {
+    throw new Error(`Error in game report at field [0]. Expected 'string'. Got ${typeof val[0]}.\n${valStr}`)
+  }
+  if (typeof val[1] !== 'number') {
+    throw new Error(`Error in game report at field [1]. Expected 'number'. Got ${typeof val[1]}.\n${valStr}`)
+  }
+  if (typeof val[2] !== 'string') {
+    throw new Error(`Error in game report at field [2]. Expected 'string'. Got ${typeof val[2]}.\n${valStr}`)
+  }
+  if (typeof val[3] !== 'string') {
+    throw new Error(`Error in game report at field [3]. Expected 'string'. Got ${typeof val[3]}.\n${valStr}`)
+  }
+  if (!isExpansion(val[4])) {
+    throw new Error(`Error in game report at field [4]. Expected Expansion. Got ${typeof val[4]}.\n${valStr}`)
+  }
+  if (!isVictory(val[5])) {
+    throw new Error(`Error in game report at field [5]. Expected Victory. Got ${typeof val[5]}.\n${valStr}`)
+  }
+  if (!isCompetitive(val[6])) {
+    throw new Error(`Error in game report at field [6]. Expected Competitive. Got ${typeof val[6]}.\n${valStr}`)
+  }
+  if (!isYesBox(val[7])) {
+    throw new Error(`Error in game report at field [7]. Expected YesBox. Got ${typeof val[7]}.\n${valStr}`)
+  }
+  if (!isYesBox(val[8])) {
+    throw new Error(`Error in game report at field [8]. Expected YesBox. Got ${typeof val[8]}.\n${valStr}`)
+  }
+  if (!isYesBox(val[9])) {
+    throw new Error(`Error in game report at field [9]. Expected YesBox. Got ${typeof val[9]}.\n${valStr}`)
+  }
+  if (typeof val[10] !== 'string') {
+    throw new Error(`Error in game report at field [10]. Expected 'string'. Got ${typeof val[10]}.\n${valStr}`)
+  }
+  if (typeof val[11] !== 'string') {
+    throw new Error(`Error in game report at field [11]. Expected 'string'. Got ${typeof val[11]}.\n${valStr}`)
+  }
+  if (typeof val[12] !== 'number') {
+    throw new Error(`Error in game report at field [12]. Expected 'number'. Got ${typeof val[12]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[13])) {
+    throw new Error(`Error in game report at field [13]. Expected TickBox. Got ${typeof val[13]}.\n${valStr}`)
+  }
+  if (typeof val[14] !== 'number') {
+    throw new Error(`Error in game report at field [14]. Expected 'number'. Got ${typeof val[14]}.\n${valStr}`)
+  }
+  if (typeof val[15] !== 'number') {
+    throw new Error(`Error in game report at field [15]. Expected 'number'. Got ${typeof val[15]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[16])) {
+    throw new Error(`Error in game report at field [16]. Expected TickBox. Got ${typeof val[16]}.\n${valStr}`)
+  }
+  if (typeof val[17] !== 'number') {
+    throw new Error(`Error in game report at field [17]. Expected 'number'. Got ${typeof val[17]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[18])) {
+    throw new Error(`Error in game report at field [18]. Expected TickBox. Got ${typeof val[18]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[19])) {
+    throw new Error(`Error in game report at field [19]. Expected TickBox. Got ${typeof val[19]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[20])) {
+    throw new Error(`Error in game report at field [20]. Expected TickBox. Got ${typeof val[20]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[21])) {
+    throw new Error(`Error in game report at field [21]. Expected TickBox. Got ${typeof val[21]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[22])) {
+    throw new Error(`Error in game report at field [22]. Expected TickBox. Got ${typeof val[22]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[23])) {
+    throw new Error(`Error in game report at field [23]. Expected TickBox. Got ${typeof val[23]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[24])) {
+    throw new Error(`Error in game report at field [24]. Expected TickBox. Got ${typeof val[24]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[25])) {
+    throw new Error(`Error in game report at field [25]. Expected TickBox. Got ${typeof val[25]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[26])) {
+    throw new Error(`Error in game report at field [26]. Expected TickBox. Got ${typeof val[26]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[27])) {
+    throw new Error(`Error in game report at field [27]. Expected TickBox. Got ${typeof val[27]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[28])) {
+    throw new Error(`Error in game report at field [28]. Expected TickBox. Got ${typeof val[28]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[29])) {
+    throw new Error(`Error in game report at field [29]. Expected TickBox. Got ${typeof val[29]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[30])) {
+    throw new Error(`Error in game report at field [30]. Expected TickBox. Got ${typeof val[30]}.\n${valStr}`)
+  }
+  if (typeof val[31] !== 'number' && val[31] !== '') {
+    throw new Error(`Error in game report at field [31]. Expected 'number' or ''. Got ${typeof val[31]}.\n${valStr}`)
+  }
+  if (typeof val[32] !== 'string') {
+    throw new Error(`Error in game report at field [32]. Expected 'string'. Got ${typeof val[32]}.\n${valStr}`)
+  }
+  if (typeof val[33] !== 'string') {
+    throw new Error(`Error in game report at field [33]. Expected 'string'. Got ${typeof val[33]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[34])) {
+    throw new Error(`Error in game report at field [34]. Expected TickBox. Got ${typeof val[34]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[35])) {
+    throw new Error(`Error in game report at field [35]. Expected TickBox. Got ${typeof val[35]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[36])) {
+    throw new Error(`Error in game report at field [36]. Expected TickBox. Got ${typeof val[36]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[37])) {
+    throw new Error(`Error in game report at field [37]. Expected TickBox. Got ${typeof val[37]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[38])) {
+    throw new Error(`Error in game report at field [38]. Expected TickBox. Got ${typeof val[38]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[39])) {
+    throw new Error(`Error in game report at field [39]. Expected TickBox. Got ${typeof val[39]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[40])) {
+    throw new Error(`Error in game report at field [40]. Expected TickBox. Got ${typeof val[40]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[41])) {
+    throw new Error(`Error in game report at field [41]. Expected TickBox. Got ${typeof val[41]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[42])) {
+    throw new Error(`Error in game report at field [42]. Expected TickBox. Got ${typeof val[42]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[43])) {
+    throw new Error(`Error in game report at field [43]. Expected TickBox. Got ${typeof val[43]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[44])) {
+    throw new Error(`Error in game report at field [44]. Expected TickBox. Got ${typeof val[44]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[45])) {
+    throw new Error(`Error in game report at field [45]. Expected TickBox. Got ${typeof val[45]}.\n${valStr}`)
+  }
+  if (!isTickBox(val[46])) {
+    throw new Error(`Error in game report at field [46]. Expected TickBox. Got ${typeof val[46]}.\n${valStr}`)
+  }
+  const report = val as ReportRow
+  // Remove leading/trailing whitespace from reported winner/loser names
+  report[2] = report[2].trim()
+  report[3] = report[3].trim()
+  return report
 }
 
 export const LADDER_ROW_LENGTH = 7
@@ -187,23 +282,37 @@ export function parseLadderRow (val: unknown): LadderRow {
   const isNotActiveDivider = (val: unknown): boolean =>
     Array.isArray(val) && val[2] === 'NOT ACTIVE PLAYERS' && val[4] === '' && val[5] === '' && val[6] === ''
 
-  if (
-    Array.isArray(val) &&
-    val.length === LADDER_ROW_LENGTH &&
-    typeof val[0] === 'number' &&
-    // No check for va[1]
-    typeof val[2] === 'string' &&
-    typeof val[3] === 'number' &&
-    (typeof val[4] === 'number' || isNotActiveDivider(val)) &&
-    (typeof val[5] === 'number' || isNotActiveDivider(val)) &&
-    (typeof val[6] === 'number' || isNotActiveDivider(val))
-  ) {
-    const entry = val as LadderRow
-    // Remove leading/trailing whitespace from player name
-    entry[2] = entry[2].trim()
-    return entry
+  const valStr = val as string
+
+  if (!Array.isArray(val)) {
+    throw new Error(`Error in ladder entry. Value is not an array.\n${valStr}`)
   }
-  throw new Error(`Failed to create a ladder row. Check the data in the row for errors.\n${val as string}`)
+  if (val.length !== LADDER_ROW_LENGTH) {
+    throw new Error(`Error in ladder entry. Expected ${LADDER_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
+  }
+  if (typeof val[0] !== 'number') {
+    throw new Error(`Error in ladder entry at field [0]. Expected 'number'. Got ${typeof val[0]}.\n${valStr}`)
+  }
+  // No check for va[1]
+  if (typeof val[2] !== 'string') {
+    throw new Error(`Error in ladder entry at field [2]. Expected 'string'. Got ${typeof val[2]}.\n${valStr}`)
+  }
+  if (typeof val[3] !== 'number') {
+    throw new Error(`Error in ladder entry at field [3]. Expected 'number'. Got ${typeof val[3]}.\n${valStr}`)
+  }
+  if (typeof val[4] !== 'number' && !isNotActiveDivider(val)) {
+    throw new Error(`Error in ladder entry at field [4]. Expected 'number'. Got ${typeof val[4]}.\n${valStr}`)
+  }
+  if (typeof val[5] !== 'number' && !isNotActiveDivider(val)) {
+    throw new Error(`Error in ladder entry at field [5]. Expected 'number'. Got ${typeof val[5]}.\n${valStr}`)
+  }
+  if (typeof val[6] !== 'number' && !isNotActiveDivider(val)) {
+    throw new Error(`Error in ladder entry at field [6]. Expected 'number'. Got ${typeof val[6]}.\n${valStr}`)
+  }
+  const entry = val as LadderRow
+  // Remove leading/trailing whitespace from player name
+  entry[2] = entry[2].trim()
+  return entry
 }
 
 export type Side = 'Shadow' | 'Free'
