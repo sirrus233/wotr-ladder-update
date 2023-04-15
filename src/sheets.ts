@@ -6,6 +6,7 @@
  */
 
 import { WotrReport, WotrLadder } from './objects'
+import { CARD_REPORT_ROW_LENGTH, CardReportRow, parseCardReportRow } from './types/cardGameTypes'
 import {
   WOTR_LADDER_ROW_LENGTH,
   WotrLadderRow,
@@ -17,7 +18,8 @@ import {
 
 // A sheet is accessed by its string name. Important sheets are catalogued here.
 const UPDATE_SHEET = 'Update'
-const FORM_RESPONSES_SHEET = 'wotr form response'
+const WOTR_FORM_RESPONSES_SHEET = 'wotr form response'
+const CARD_FORM_RESPONSES_SHEET = 'Card game responses'
 const GAME_REPORTS_SHEET = 'WotR Reports'
 const GAME_REPORTS_WITHOUT_STATS_SHEET = 'Ladder Games with no stats'
 const LADDER_SHEET = 'WOTR ladder'
@@ -68,9 +70,11 @@ export class UpdateSheet extends Sheet {
 }
 
 /** Has the output of the form players use to report their games. This is where games live before they are processed. */
-export class WotrFormResponseSheet extends Sheet {
-  protected readonly _sheetName = FORM_RESPONSES_SHEET
-  private readonly HEADERS = 1
+abstract class FormResponseSheet<T> extends Sheet {
+  protected abstract readonly _sheetName: string
+  protected abstract readonly _parser: (val: unknown) => T
+  protected abstract readonly HEADERS: number
+  protected abstract readonly ROW_LENGTH: number
   /**
    * Form responses are processed in batches, primarily due to legacy behavior where it took a very long time
    * to process large numbers of reports. Batch processing is supported here, and the size of the batch must be
@@ -87,7 +91,7 @@ export class WotrFormResponseSheet extends Sheet {
    * Read a batch of responses from the sheet. NOTE: If there are fewer responses than the object's batchSize, then the
    * batchSize is automatically adjusted down to match the total number of responses.
    */
-  readResponses (): WotrReportRow[] {
+  readResponses (): T[] {
     if (this._batchSize === 0) {
       return []
     }
@@ -103,8 +107,8 @@ export class WotrFormResponseSheet extends Sheet {
     if (numReports < this._batchSize) {
       this._batchSize = numReports
     }
-    const responseRange = this.sheet.getRange(this.HEADERS + 1, 1, this._batchSize, WOTR_REPORT_ROW_LENGTH)
-    return responseRange.getValues().map(parseWotrReportRow)
+    const responseRange = this.sheet.getRange(this.HEADERS + 1, 1, this._batchSize, ROW_LENGTH)
+    return responseRange.getValues().map(this._parser)
   }
 
   /** Delete a batch of responses. */
@@ -115,6 +119,20 @@ export class WotrFormResponseSheet extends Sheet {
 
     this.sheet.deleteRows(this.HEADERS + 1, this._batchSize)
   }
+}
+
+export class WotrFormResponseSheet extends FormResponseSheet<WotrReportRow> {
+  protected readonly _sheetName = WOTR_FORM_RESPONSES_SHEET
+  protected readonly _parser = parseWotrReportRow
+  protected readonly HEADERS = 1
+  protected readonly ROW_LENGTH = WOTR_REPORT_ROW_LENGTH
+}
+
+export class CardGameFormResponseSheet extends FormResponseSheet<CardReportRow> {
+  protected readonly _sheetName = CARD_FORM_RESPONSES_SHEET
+  protected readonly _parser = parseCardReportRow
+  protected readonly HEADERS = 1
+  protected readonly ROW_LENGTH = CARD_REPORT_ROW_LENGTH
 }
 
 /** The ladder that tracks players and their ranks and ratings. */

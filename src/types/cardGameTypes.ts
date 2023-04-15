@@ -32,8 +32,8 @@ const YES_NO = ['Yes', 'No'] as const
 const isYesNo = createTypeGuard(unionParser(YES_NO))
 export type YesNo = (typeof YES_NO)[number]
 
-export const REPORT_ROW_LENGTH = 14
-export type ReportRow = [
+export const CARD_REPORT_ROW_LENGTH = 14
+export type CardReportRow = [
   timestamp: Date,
   witchKingPlayer: string,
   sarumanPlayer: string,
@@ -49,14 +49,14 @@ export type ReportRow = [
   gameType: GameType,
   corruption: number | ''
 ]
-export function parseReportRow (val: unknown): ReportRow {
+export function parseCardReportRow (val: unknown): CardReportRow {
   const valStr = val as string
 
   if (!Array.isArray(val)) {
     throw new Error(`Error in game report. Value is not an array.\n${valStr}`)
   }
-  if (val.length !== REPORT_ROW_LENGTH) {
-    throw new Error(`Error in game report. Expected ${REPORT_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
+  if (val.length !== CARD_REPORT_ROW_LENGTH) {
+    throw new Error(`Error in game report. Expected ${CARD_REPORT_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
   }
   if (Object.prototype.toString.call(val[0]) !== '[object Date]') {
     throw new Error(`Error in game report at field [0]. Expected 'Date'. Got ${typeof val[0]}.\n${valStr}`)
@@ -100,7 +100,7 @@ export function parseReportRow (val: unknown): ReportRow {
   if (typeof val[13] !== 'number' && val[13] !== '') {
     throw new Error(`Error in game report at field [13]. Expected number or ''. Got ${typeof val[13]}.\n${valStr}`)
   }
-  const entry = val as ReportRow
+  const entry = val as CardReportRow
   // Remove leading/trailing whitespace from each player name
   entry[1] = entry[1].trim()
   entry[2] = entry[2].trim()
