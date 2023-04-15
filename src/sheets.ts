@@ -149,8 +149,8 @@ export class LadderSheet extends Sheet {
     // Actual data, like the name, can be over-written later. But all other columns have their formulae copied this way.
     const sheetWidth = this.sheet.getMaxColumns()
     const lastEntryRange = this.sheet.getRange(this.HEADERS + originalPlayers, 1, 1, sheetWidth)
-    const newPlayerEntriesRange = this.sheet.getRange(this.HEADERS + newPlayers + 1, 1, newPlayers, sheetWidth)
-    lastEntryRange.copyTo(newPlayerEntriesRange, { contentsOnly: false })
+    const newPlayerEntriesRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, 1, newPlayers, sheetWidth)
+    lastEntryRange.copyTo(newPlayerEntriesRange, SpreadsheetApp.CopyPasteType.PASTE_FORMULA, false)
     // Since the write operation doesn't touch the flag column, we should manually clear it on all new player rows,
     // in case one was copied from the player row we used to initialize the row.
     const newPlayerFlagRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, this.FLAG_COL, newPlayers, 1)
