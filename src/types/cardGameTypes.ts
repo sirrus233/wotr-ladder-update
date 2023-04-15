@@ -46,7 +46,7 @@ export type CardReportRow = [
   pathNumber: number,
   promo: YesNo,
   players: number,
-  gameType: GameType,
+  gameType: GameType | '',
   corruption: number | ''
 ]
 export function parseCardReportRow (val: unknown): CardReportRow {
@@ -94,8 +94,8 @@ export function parseCardReportRow (val: unknown): CardReportRow {
   if (typeof val[11] !== 'number') {
     throw new Error(`Error in game report at field [11]. Expected 'number'. Got ${typeof val[11]}.\n${valStr}`)
   }
-  if (!isGameType(val[12])) {
-    throw new Error(`Error in game report at field [12]. Expected GameType. Got ${typeof val[12]}.\n${valStr}`)
+  if (!isGameType(val[12]) && val[12] !== '') {
+    throw new Error(`Error in game report at field [12]. Expected GameType or ''. Got ${typeof val[12]}.\n${valStr}`)
   }
   if (typeof val[13] !== 'number' && val[13] !== '') {
     throw new Error(`Error in game report at field [13]. Expected number or ''. Got ${typeof val[13]}.\n${valStr}`)
