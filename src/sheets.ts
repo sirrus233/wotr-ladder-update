@@ -197,12 +197,10 @@ export class ReportSheet extends Sheet {
     const annotationStartCol = sheetWidth - annotationWidth + 1 // Account for future admin columns before annotations
     // Add a new row for each report.
     this.sheet.insertRowsBefore(this.HEADERS + 1, reports.length)
-    // Copy the latest report (pre-update) to each new row. This is to get the formulas copied over, and turns out to
-    // be significantly faster than the get/set formula APIs
+    // Copy the formulas from the latest report (pre-update) to each new row.
     const latestReport = this.sheet.getRange(this.HEADERS + reports.length + 1, 1, 1, sheetWidth)
-    for (let i = 1; i <= reports.length; i++) {
-      latestReport.copyTo(this.sheet.getRange(this.HEADERS + i, 1, 1, sheetWidth))
-    }
+    const newReportsRange = this.sheet.getRange(this.HEADERS + 1, 1, reports.length, sheetWidth)
+    latestReport.copyTo(newReportsRange, SpreadsheetApp.CopyPasteType.PASTE_FORMULA, false)
     // Now we need to write the data and annotations into the sheet, overwriting the values we copied. Formula cells
     // should stay untouched, retaining their values.
     // Copy all report data.
