@@ -14,6 +14,7 @@ export function updateWotrLadder (): void {
   // Read sheet data and build the ladder
   const reports = responseSheet.readResponses().map((row) => new WotrReport(row))
   const ladderEntries = ladderSheet.readLadder().map((row) => new WotrLadderEntry(row))
+  const originalPlayerCount = ladderEntries.length
   const ladder = new WotrLadder(ladderEntries)
 
   // Process all the ladder games in the batch
@@ -31,7 +32,6 @@ export function updateWotrLadder (): void {
 
   // Update the ladder with new ratings and new players (if any)
   console.log('Updating Ladder...')
-  const originalPlayerCount = ladderEntries.length
   const newPlayerCount = ladder.entries.length - originalPlayerCount
   ladderSheet.prepareNewPlayerRows(originalPlayerCount, newPlayerCount)
   ladderSheet.writeLadderEntries(ladder)
