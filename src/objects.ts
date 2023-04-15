@@ -4,12 +4,12 @@
  * manipulation tasks easier than dealing with raw data Arrays.
  */
 import { computeEloDiff } from './utils'
-import { Annotation, Competitive, LadderRow, ReportRow, Side, Victory } from './types/wotrTypes'
+import { Annotation, Competitive, WotrLadderRow, WotrReportRow, WotrSide, Victory } from './types/wotrTypes'
 
 /** Representation of a single game report. */
 export class WotrReport {
   /** The report as read from the spreadsheet in Array/Tuple form. */
-  row: ReportRow
+  row: WotrReportRow
   /** Name of the winner. */
   winner: string
   /** Name of the loser. */
@@ -21,7 +21,7 @@ export class WotrReport {
   /** Annotation data for ladder managers. Initialized to a default state, and updated when this report is processed. */
   annotation: Annotation = [0, 0, 0, 0, 0, 0, 0, 0]
 
-  constructor (row: ReportRow) {
+  constructor (row: WotrReportRow) {
     this.row = row
     this.winner = row[2]
     this.loser = row[3]
@@ -40,12 +40,12 @@ export class WotrReport {
   }
 
   /** Which side won */
-  winningSide (): Side {
+  winningSide (): WotrSide {
     return this.victory.includes('Shadow') || this.victory.includes('SP') ? 'Shadow' : 'Free'
   }
 
   /** Which side lost */
-  losingSide (): Side {
+  losingSide (): WotrSide {
     return this.winningSide() === 'Shadow' ? 'Free' : 'Shadow'
   }
 }
@@ -63,7 +63,7 @@ export class WotrLadderEntry {
   /** The player's total number of games played (all time). */
   gamesPlayed: number
 
-  constructor (row: LadderRow) {
+  constructor (row: WotrLadderRow) {
     this.name = row[2]
     this.normalizedName = this.name.toLowerCase()
     this.shadowRating = row[4]
@@ -72,12 +72,12 @@ export class WotrLadderEntry {
   }
 
   /** Return this player's rating for a particular Side. */
-  getRating (side: Side): number {
+  getRating (side: WotrSide): number {
     return side === 'Shadow' ? this.shadowRating : this.freeRating
   }
 
   /** Set this player's rating for a particular Side to a given value. */
-  setRating (side: Side, value: number): void {
+  setRating (side: WotrSide, value: number): void {
     if (side === 'Shadow') {
       this.shadowRating = value
     } else {

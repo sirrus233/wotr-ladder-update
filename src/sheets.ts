@@ -7,12 +7,12 @@
 
 import { WotrReport, WotrLadder } from './objects'
 import {
-  LADDER_ROW_LENGTH,
-  LadderRow,
-  REPORT_ROW_LENGTH,
-  ReportRow,
-  parseLadderRow,
-  parseReportRow
+  WOTR_LADDER_ROW_LENGTH,
+  WotrLadderRow,
+  WOTR_REPORT_ROW_LENGTH,
+  WotrReportRow,
+  parseWotrLadderRow,
+  parseWotrReportRow
 } from './types/wotrTypes'
 
 // A sheet is accessed by its string name. Important sheets are catalogued here.
@@ -87,7 +87,7 @@ export class WotrFormResponseSheet extends Sheet {
    * Read a batch of responses from the sheet. NOTE: If there are fewer responses than the object's batchSize, then the
    * batchSize is automatically adjusted down to match the total number of responses.
    */
-  readResponses (): ReportRow[] {
+  readResponses (): WotrReportRow[] {
     if (this._batchSize === 0) {
       return []
     }
@@ -103,8 +103,8 @@ export class WotrFormResponseSheet extends Sheet {
     if (numReports < this._batchSize) {
       this._batchSize = numReports
     }
-    const responseRange = this.sheet.getRange(this.HEADERS + 1, 1, this._batchSize, REPORT_ROW_LENGTH)
-    return responseRange.getValues().map(parseReportRow)
+    const responseRange = this.sheet.getRange(this.HEADERS + 1, 1, this._batchSize, WOTR_REPORT_ROW_LENGTH)
+    return responseRange.getValues().map(parseWotrReportRow)
   }
 
   /** Delete a batch of responses. */
@@ -129,15 +129,15 @@ export class WotrLadderSheet extends Sheet {
   private readonly ACTIVE_RATING_COL = 30 // "Active rating", a modified rating used for sorting
 
   /** Read all player entries from the ladder */
-  readLadder (): LadderRow[] {
+  readLadder (): WotrLadderRow[] {
     // Most of the ladder is managed by sheet formulas automatically, so we don't need to grab entire rows.
     // It is sufficient to grab name + rating information
-    const ladderRange = this.sheet.getRange(this.HEADERS + 1, 1, this.sheet.getLastRow(), LADDER_ROW_LENGTH)
+    const ladderRange = this.sheet.getRange(this.HEADERS + 1, 1, this.sheet.getLastRow(), WOTR_LADDER_ROW_LENGTH)
     const ladderValues = ladderRange.getValues()
     // The sheet has a footer that will get picked up when parsing. We need to find and drop any trailing rows that do
     // not represent players.
     const numPlayers = ladderValues.findIndex((row) => row[0] === '')
-    return ladderValues.slice(0, numPlayers).map(parseLadderRow)
+    return ladderValues.slice(0, numPlayers).map(parseWotrLadderRow)
   }
 
   /**
