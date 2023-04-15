@@ -21,8 +21,10 @@ const UPDATE_SHEET = 'Update'
 const WOTR_FORM_RESPONSES_SHEET = 'wotr form response'
 const CARD_FORM_RESPONSES_SHEET = 'Card game responses'
 const GAME_REPORTS_SHEET = 'WotR Reports'
+const CARD_REPORTS_SHEET = 'Card Game Reports'
 const GAME_REPORTS_WITHOUT_STATS_SHEET = 'Ladder Games with no stats'
-const LADDER_SHEET = 'WOTR ladder'
+const WOTR_LADDER_SHEET = 'WOTR ladder'
+const CARD_LADDER_SHEET = 'Card Game 2023 ladder'
 
 /**
  * Base class for all Sheets.
@@ -107,7 +109,7 @@ abstract class FormResponseSheet<T> extends Sheet {
     if (numReports < this._batchSize) {
       this._batchSize = numReports
     }
-    const responseRange = this.sheet.getRange(this.HEADERS + 1, 1, this._batchSize, ROW_LENGTH)
+    const responseRange = this.sheet.getRange(this.HEADERS + 1, 1, this._batchSize, this.ROW_LENGTH)
     return responseRange.getValues().map(this._parser)
   }
 
@@ -137,7 +139,7 @@ export class CardGameFormResponseSheet extends FormResponseSheet<CardReportRow> 
 
 /** The ladder that tracks players and their ranks and ratings. */
 export class WotrLadderSheet extends Sheet {
-  protected readonly _sheetName = LADDER_SHEET
+  protected readonly _sheetName = WOTR_LADDER_SHEET
   private readonly HEADERS = 3
   // Some columns have important semantics
   private readonly FLAG_COL = 2 // Player's national flag
@@ -260,5 +262,27 @@ export class WotrReportSheetWithoutStats extends Sheet {
     const newReportsDataRange = this.sheet.getRange(this.HEADERS + 1, this.DATA_START_COL, reports.length, reportWidth)
     newReportsDataRange.setValues(reports.map((report) => report.row))
     this.sheet.sort(this.DATA_START_COL, false)
+  }
+}
+
+/** Game reports and their statistics that have been processed. */
+export class CardReportSheet extends Sheet {
+  protected readonly _sheetName = CARD_REPORTS_SHEET
+  private readonly HEADERS = 1
+
+  /** Update with new reports, appended to the top of the sheet. */
+  updateReports (reports: CardReportRow[]): void {
+    if (reports.length === 0) {
+      return
+    }
+
+    const reportWidth = reports[0].length
+    // Add a new row for each report.
+    this.sheet.insertRowsBefore(this.HEADERS + 1, reports.length)
+    // Write reports into the sheet
+    this.sheet.getRange(this.HEADERS + 1, 1, reports.length, reportWidth).setValues(reports)
+    // Sort the sheet by the first data column, which should be Timestamp. Most recent reports should be at the top.
+    // We need to make sure to ignore the header.
+    this.sheet.getDataRange().offset(1, 0).sort({ column: 1, ascending: false })
   }
 }
