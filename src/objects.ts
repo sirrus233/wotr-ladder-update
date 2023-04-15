@@ -4,7 +4,7 @@
  * manipulation tasks easier than dealing with raw data Arrays.
  */
 import { computeEloDiff } from './utils'
-import { Annotation, Competitive, LadderRow, ReportRow, Side, Victory } from './types'
+import { Annotation, Competitive, LadderRow, ReportRow, Side, Victory } from './types/wotrTypes'
 
 /** Representation of a single game report. */
 export class WotrReport {

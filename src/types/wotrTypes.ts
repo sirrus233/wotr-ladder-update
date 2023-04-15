@@ -4,22 +4,10 @@
  * Google's APIs return untyped data. Getting cell values is generally type any[][], representing an array of rows
  * where each row is an array of anything. Since the data in the sheet is structured in a known format, these parsers,
  * types, and guards let us deal with the data in a strongly typed way.
+ *
+ * Types for the WotR Board Game
  */
-
-/** A function which maps an unknown value to a concretely typed one. */
-type Parser<T> = (val: unknown) => T | null
-
-/** Factory function to create a Parser for a type union of literals, given an array of the union's variants.  */
-function unionParser<T> (variants: readonly T[]): Parser<T> {
-  return (val: unknown) => (variants.includes(val as T) ? (val as T) : null)
-}
-
-/** A function which takes a parser and returns a new function that is a safe type guard for T. */
-const createTypeGuard =
-  <T>(parse: Parser<T>) =>
-    (value: unknown): value is T => {
-      return parse(value) !== null
-    }
+import { unionParser, createTypeGuard } from './types'
 
 const EXPANSION = ['Base', 'LoME', 'WoME', 'LoME+WoME'] as const
 const isExpansion = createTypeGuard(unionParser(EXPANSION))

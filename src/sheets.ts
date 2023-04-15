@@ -6,7 +6,14 @@
  */
 
 import { WotrReport, WotrLadder } from './objects'
-import { LADDER_ROW_LENGTH, LadderRow, REPORT_ROW_LENGTH, ReportRow, parseLadderRow, parseReportRow } from './types'
+import {
+  LADDER_ROW_LENGTH,
+  LadderRow,
+  REPORT_ROW_LENGTH,
+  ReportRow,
+  parseLadderRow,
+  parseReportRow
+} from './types/wotrTypes'
 
 // A sheet is accessed by its string name. Important sheets are catalogued here.
 const UPDATE_SHEET = 'Update'
