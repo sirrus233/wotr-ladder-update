@@ -68,7 +68,7 @@ export class UpdateSheet extends Sheet {
 }
 
 /** Has the output of the form players use to report their games. This is where games live before they are processed. */
-export class FormResponseSheet extends Sheet {
+export class WotrFormResponseSheet extends Sheet {
   protected readonly _sheetName = FORM_RESPONSES_SHEET
   private readonly HEADERS = 1
   /**
@@ -118,7 +118,7 @@ export class FormResponseSheet extends Sheet {
 }
 
 /** The ladder that tracks players and their ranks and ratings. */
-export class LadderSheet extends Sheet {
+export class WotrLadderSheet extends Sheet {
   protected readonly _sheetName = LADDER_SHEET
   private readonly HEADERS = 3
   // Some columns have important semantics
@@ -183,7 +183,7 @@ export class LadderSheet extends Sheet {
 }
 
 /** Game reports and their statistics that have been processed. */
-export class ReportSheet extends Sheet {
+export class WotrReportSheet extends Sheet {
   protected readonly _sheetName = GAME_REPORTS_SHEET
   private readonly HEADERS = 1
   /**
@@ -224,7 +224,7 @@ export class ReportSheet extends Sheet {
 }
 
 /** Processed game reports where the players could not remember the game stats. */
-export class ReportSheetWithoutStats extends Sheet {
+export class WotrReportSheetWithoutStats extends Sheet {
   protected readonly _sheetName = GAME_REPORTS_WITHOUT_STATS_SHEET
   private readonly HEADERS = 1
   private readonly DATA_START_COL = 2
