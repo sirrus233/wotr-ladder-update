@@ -11,11 +11,11 @@ import { createTypeGuard, unionParser } from './types'
 
 const COMPETITIVE = ['Friendly', 'Ladder'] as const
 const isCompetitive = createTypeGuard(unionParser(COMPETITIVE))
-export type Competitive = (typeof COMPETITIVE)[number]
+export type CardCompetitive = (typeof COMPETITIVE)[number]
 
 const WINNER = ['FP', 'SP', 'Two Tower / Return of the King'] as const
 const isWinner = createTypeGuard(unionParser(WINNER))
-export type Winner = (typeof WINNER)[number]
+export type CardWinner = (typeof WINNER)[number]
 
 const GAME_TYPE = [
   'Expert Duel',
@@ -26,7 +26,7 @@ const GAME_TYPE = [
   'Return of the King'
 ] as const
 const isGameType = createTypeGuard(unionParser(GAME_TYPE))
-export type GameType = (typeof GAME_TYPE)[number]
+export type CardGameType = (typeof GAME_TYPE)[number]
 
 const YES_NO = ['Yes', 'No'] as const
 const isYesNo = createTypeGuard(unionParser(YES_NO))
@@ -39,14 +39,14 @@ export type CardReportRow = [
   sarumanPlayer: string,
   frodoPlayer: string,
   aragornPlayer: string,
-  competitive: Competitive,
-  winner: Winner,
+  competitive: CardCompetitive,
+  winner: CardWinner,
   fpPoints: number,
   spPoints: number,
   pathNumber: number,
   promo: YesNo,
   players: number,
-  gameType: GameType | '',
+  gameType: CardGameType | '',
   corruption: number | ''
 ]
 export function parseCardReportRow (val: unknown): CardReportRow {
@@ -108,3 +108,115 @@ export function parseCardReportRow (val: unknown): CardReportRow {
   entry[4] = entry[4].trim()
   return entry
 }
+
+export const CARD_LADDER_ROW_LENGTH = 23
+export type CardLadderRow = [
+  rank: number,
+  flag: unknown, // This is a CellImage. Google doesn't seem to publish this type? I couldn't find it.
+  name: string,
+  averageRating: number,
+  witchKingRating: number,
+  sarumanRating: number,
+  frodoRating: number,
+  aragornRating: number,
+  averageFPRating: number,
+  averageSPRating: number,
+  gamesPlayed: number,
+  gamesPlayed4: number,
+  gamesPlayed3: number,
+  gamesPlayed2: number,
+  fellowship: '',
+  witchKingGames: number,
+  witchKingWins: number,
+  sarumanGames: number,
+  sarumanWins: number,
+  frodoGames: number,
+  frodoWins: number,
+  aragornGames: number,
+  aragornWins: number
+]
+export function parseCardLadderRow (val: unknown): CardLadderRow {
+  const valStr = val as string
+
+  if (!Array.isArray(val)) {
+    throw new Error(`Error in ladder entry. Value is not an array.\n${valStr}`)
+  }
+  if (val.length !== CARD_LADDER_ROW_LENGTH) {
+    throw new Error(`Error in ladder entry. Expected ${CARD_LADDER_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
+  }
+  if (typeof val[0] !== 'number') {
+    throw new Error(`Error in ladder entry at field [0]. Expected 'number'. Got ${typeof val[0]}.\n${valStr}`)
+  }
+  // No check for val[1]
+  if (typeof val[2] !== 'string') {
+    throw new Error(`Error in ladder entry at field [2]. Expected 'string'. Got ${typeof val[2]}.\n${valStr}`)
+  }
+  if (typeof val[3] !== 'number') {
+    throw new Error(`Error in ladder entry at field [3]. Expected 'number'. Got ${typeof val[3]}.\n${valStr}`)
+  }
+  if (typeof val[4] !== 'number') {
+    throw new Error(`Error in ladder entry at field [4]. Expected 'number'. Got ${typeof val[4]}.\n${valStr}`)
+  }
+  if (typeof val[5] !== 'number') {
+    throw new Error(`Error in ladder entry at field [5]. Expected 'number'. Got ${typeof val[5]}.\n${valStr}`)
+  }
+  if (typeof val[6] !== 'number') {
+    throw new Error(`Error in ladder entry at field [6]. Expected 'number'. Got ${typeof val[6]}.\n${valStr}`)
+  }
+  if (typeof val[7] !== 'number') {
+    throw new Error(`Error in ladder entry at field [7]. Expected 'number'. Got ${typeof val[7]}.\n${valStr}`)
+  }
+  if (typeof val[8] !== 'number') {
+    throw new Error(`Error in ladder entry at field [8]. Expected 'number'. Got ${typeof val[8]}.\n${valStr}`)
+  }
+  if (typeof val[9] !== 'number') {
+    throw new Error(`Error in ladder entry at field [9]. Expected 'number'. Got ${typeof val[9]}.\n${valStr}`)
+  }
+  if (typeof val[10] !== 'number') {
+    throw new Error(`Error in ladder entry at field [10]. Expected 'number'. Got ${typeof val[10]}.\n${valStr}`)
+  }
+  if (typeof val[11] !== 'number') {
+    throw new Error(`Error in ladder entry at field [11]. Expected 'number'. Got ${typeof val[11]}.\n${valStr}`)
+  }
+  if (typeof val[12] !== 'number') {
+    throw new Error(`Error in ladder entry at field [12]. Expected 'number'. Got ${typeof val[12]}.\n${valStr}`)
+  }
+  if (typeof val[13] !== 'number') {
+    throw new Error(`Error in ladder entry at field [13]. Expected 'number'. Got ${typeof val[13]}.\n${valStr}`)
+  }
+  if (val[14] !== '') {
+    throw new Error(`Error in ladder entry at field [14]. Expected ''. Got ${typeof val[14]}.\n${valStr}`)
+  }
+  if (typeof val[15] !== 'number') {
+    throw new Error(`Error in ladder entry at field [15]. Expected 'number'. Got ${typeof val[15]}.\n${valStr}`)
+  }
+  if (typeof val[16] !== 'number') {
+    throw new Error(`Error in ladder entry at field [16]. Expected 'number'. Got ${typeof val[16]}.\n${valStr}`)
+  }
+  if (typeof val[17] !== 'number') {
+    throw new Error(`Error in ladder entry at field [17]. Expected 'number'. Got ${typeof val[17]}.\n${valStr}`)
+  }
+  if (typeof val[18] !== 'number') {
+    throw new Error(`Error in ladder entry at field [18]. Expected 'number'. Got ${typeof val[18]}.\n${valStr}`)
+  }
+  if (typeof val[19] !== 'number') {
+    throw new Error(`Error in ladder entry at field [19]. Expected 'number'. Got ${typeof val[19]}.\n${valStr}`)
+  }
+  if (typeof val[20] !== 'number') {
+    throw new Error(`Error in ladder entry at field [20]. Expected 'number'. Got ${typeof val[20]}.\n${valStr}`)
+  }
+  if (typeof val[21] !== 'number') {
+    throw new Error(`Error in ladder entry at field [21]. Expected 'number'. Got ${typeof val[21]}.\n${valStr}`)
+  }
+  if (typeof val[22] !== 'number') {
+    throw new Error(`Error in ladder entry at field [22]. Expected 'number'. Got ${typeof val[22]}.\n${valStr}`)
+  }
+  const entry = val as CardLadderRow
+  // Remove leading/trailing whitespace from player name
+  entry[2] = entry[2].trim()
+  return entry
+}
+
+export type CardRole = 'WitchKing' | 'Saruman' | 'Frodo' | 'Aragorn'
+
+export type CardSide = 'Shadow' | 'Free'

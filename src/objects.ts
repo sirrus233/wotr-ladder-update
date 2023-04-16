@@ -4,7 +4,8 @@
  * manipulation tasks easier than dealing with raw data Arrays.
  */
 import { computeEloDiff } from './utils'
-import { Annotation, Competitive, WotrLadderRow, WotrReportRow, WotrSide, Victory } from './types/wotrTypes'
+import { Annotation, WotrCompetitive, WotrLadderRow, WotrReportRow, WotrSide, WotrVictory } from './types/wotrTypes'
+import { CardCompetitive, CardLadderRow, CardReportRow, CardRole, CardSide, CardWinner } from './types/cardGameTypes'
 
 /** Representation of a single game report. */
 export class WotrReport {
@@ -15,9 +16,9 @@ export class WotrReport {
   /** Name of the loser. */
   loser: string
   /** Victory type. */
-  victory: Victory
+  victory: WotrVictory
   /** Whether or not the game was competitive/friendly. */
-  competitive: Competitive
+  competitive: WotrCompetitive
   /** Annotation data for ladder managers. Initialized to a default state, and updated when this report is processed. */
   annotation: Annotation = [0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -50,12 +51,91 @@ export class WotrReport {
   }
 }
 
+/** Representation of a single game report. */
+export class CardReport {
+  /** The report as read from the spreadsheet in Array/Tuple form. */
+  row: CardReportRow
+  /** Whether or not the game was competitive/friendly. */
+  competitive: CardCompetitive
+  /** Which side won */
+  victory: CardWinner
+
+  constructor (row: CardReportRow) {
+    this.row = row
+    this.competitive = row[5]
+    this.victory = row[6]
+  }
+
+  /** Was this game played competitively */
+  isLadderGame (): boolean {
+    return this.competitive.startsWith('Ladder')
+  }
+
+  /** Which side won */
+  winningSide (): CardSide | '' {
+    switch (this.victory) {
+      case 'FP':
+        return 'Free'
+      case 'SP':
+        return 'Shadow'
+      case 'Two Tower / Return of the King':
+        return ''
+    }
+  }
+
+  /** Which side lost */
+  losingSide (): CardSide | '' {
+    switch (this.winningSide()) {
+      case 'Free':
+        return 'Shadow'
+      case 'Shadow':
+        return 'Free'
+      case '':
+        return ''
+    }
+  }
+
+  /** Which player played a particular role */
+  getPlayer (role: CardRole): string {
+    switch (role) {
+      case 'WitchKing':
+        return this.row[1]
+      case 'Saruman':
+        return this.row[2]
+      case 'Frodo':
+        return this.row[3]
+      case 'Aragorn':
+        return this.row[4]
+    }
+  }
+
+  /** How many unique players played this game */
+  playerCount (): number {
+    return new Set([
+      this.row[1].toLowerCase(),
+      this.row[2].toLowerCase(),
+      this.row[3].toLowerCase(),
+      this.row[4].toLowerCase()
+    ]).size
+  }
+}
+
 /** Representation of a single player's stats on the ladder. */
-export class WotrLadderEntry {
+abstract class LadderEntry {
+  /** The player's name. */
+  abstract name: string
+
+  /**
+   * Return the player's average rating, used for overall ladder rank. This should be computed from the side/role fields
+   * rather than read directly from the "rating" field of the row, since that is generally computed on the spreadsheet,
+   * and will not have its value changed as part of the ladder processing process.
+   */
+  abstract avgRating (): number
+}
+
+export class WotrLadderEntry extends LadderEntry {
   /** The player's name. */
   name: string
-  /** The player's name, normalized for lookup. */
-  normalizedName: string
   /** The player's Shadow rating. */
   shadowRating: number
   /** The player's Free rating. */
@@ -64,11 +144,15 @@ export class WotrLadderEntry {
   gamesPlayed: number
 
   constructor (row: WotrLadderRow) {
+    super()
     this.name = row[2]
-    this.normalizedName = this.name.toLowerCase()
     this.shadowRating = row[4]
     this.freeRating = row[5]
     this.gamesPlayed = row[6]
+  }
+
+  avgRating (): number {
+    return (this.shadowRating + this.freeRating) / 2
   }
 
   /** Return this player's rating for a particular Side. */
@@ -84,38 +168,135 @@ export class WotrLadderEntry {
       this.freeRating = value
     }
   }
+}
 
-  /** Return the player's average rating between the two sides. */
+export class CardLadderEntry extends LadderEntry {
+  /** A row read directly from the ladder sheet in Array/Tuple form. */
+  row: CardLadderRow
+  /** The player's name. */
+  name: string
+  witchKingRating: number
+  sarumanRating: number
+  frodoRating: number
+  aragornRating: number
+
+  constructor (row: CardLadderRow) {
+    super()
+    this.row = row
+    this.name = row[2]
+    this.witchKingRating = row[5]
+    this.sarumanRating = row[6]
+    this.frodoRating = row[7]
+    this.aragornRating = row[8]
+  }
+
   avgRating (): number {
-    return (this.shadowRating + this.freeRating) / 2
+    return (this.witchKingRating + this.sarumanRating + this.frodoRating + this.aragornRating) / 4
+  }
+
+  /** Return this player's rating for a particular Role. */
+  getRating (role: CardRole): number {
+    switch (role) {
+      case 'WitchKing':
+        return this.witchKingRating
+      case 'Saruman':
+        return this.sarumanRating
+      case 'Frodo':
+        return this.frodoRating
+      case 'Aragorn':
+        return this.aragornRating
+    }
+  }
+
+  /** Set this player's rating for a particular Role to a given value. */
+  setRating (role: CardRole, value: number): void {
+    switch (role) {
+      case 'WitchKing':
+        this.witchKingRating = value
+        break
+      case 'Saruman':
+        this.sarumanRating = value
+        break
+      case 'Frodo':
+        this.frodoRating = value
+        break
+      case 'Aragorn':
+        this.aragornRating = value
+        break
+    }
+  }
+
+  /** Increase number of games for a particular player count (e.g. 4-player games played) */
+  incrementGameCount (playerCount: number): void {
+    switch (playerCount) {
+      case 4:
+        this.row[10] += 1
+        this.row[11] += 1
+        break
+      case 3:
+        this.row[10] += 1
+        this.row[12] += 1
+        break
+      case 2:
+        this.row[10] += 1
+        this.row[13] += 1
+        break
+      default:
+        throw new Error(`Invalid player count: ${playerCount}`)
+    }
+  }
+
+  /** Increase number of wins for a particular role */
+  incrementWinCount (role: CardRole): void {
+    switch (role) {
+      case 'WitchKing':
+        this.row[16] += 1
+        break
+      case 'Saruman':
+        this.row[18] += 1
+        break
+      case 'Frodo':
+        this.row[20] += 1
+        break
+      case 'Aragorn':
+        this.row[22] += 1
+        break
+    }
   }
 }
 
 /** Representation of the entire ladder system. */
-export class WotrLadder {
+abstract class Ladder<T extends LadderEntry> {
   /**
    * Ladder entries in the order they were processed from the Google Sheet. New entries may be appended to this
    * Array if games with new players are processed, but the relative order is never changed.
    */
-  originalEntries: WotrLadderEntry[]
+  originalEntries: T[]
   /** Ladder entries sorted by ranked order (e.g. highest rated player first, etc.). */
-  entries: WotrLadderEntry[]
+  entries: T[]
   /** Lookup table for ladder entries, keyed by normalized player name. */
-  entryMap: Map<string, WotrLadderEntry>
+  entryMap: Map<string, T>
 
-  constructor (entries: WotrLadderEntry[]) {
+  constructor (entries: T[]) {
     this.originalEntries = [...entries]
     this.entries = entries
-    this.entryMap = new Map(entries.map((entry) => [entry.normalizedName, entry]))
+    this.entryMap = new Map(entries.map((entry) => [this.normalize(entry.name), entry]))
   }
+
+  /** Return a name, normalized for lookup in the ladder */
+  normalize (name: string): string {
+    return name.toLowerCase()
+  }
+
+  /** Return an initialized new ladder entry, for this ladder */
+  abstract getDefaultEntry (name: string): T
 
   /**
    * Get the ladder entry associated with a given player name. The name will be normalized prior to performing the
    * lookup. If the player does not exist in the ladder, this function returns undefined.
    */
-  getEntry (name: string): WotrLadderEntry | undefined {
-    const normalizedName = name.toLowerCase()
-    return this.entryMap.get(normalizedName)
+  getEntry (name: string): T | undefined {
+    return this.entryMap.get(this.normalize(name))
   }
 
   /**
@@ -123,8 +304,8 @@ export class WotrLadder {
    * lookup. If the player does not exist in the ladder, this function throws an error.
    */
   getRank (name: string): number {
-    const normalizedName = name.toLowerCase()
-    const rank = this.entries.findIndex((entry) => entry.normalizedName === normalizedName)
+    const normalizedName = this.normalize(name)
+    const rank = this.entries.findIndex((entry) => this.normalize(entry.name) === normalizedName)
     if (rank < 0) {
       throw new Error(`No entry in ladder for player ${name}`)
     }
@@ -135,13 +316,20 @@ export class WotrLadder {
    * Add a new player to the ladder in the default position (Rating: 500|500). This has the side effect of appending
    * the new player to the originalEntries Array.
    */
-  addPlayer (name: string): WotrLadderEntry {
-    const entry = new WotrLadderEntry([0, '', name, 500, 500, 500, 0])
+  addPlayer (name: string): T {
+    const entry = this.getDefaultEntry(name)
     this.entries.push(entry)
     this.originalEntries.push(entry)
-    this.entryMap.set(entry.normalizedName, entry)
+    this.entryMap.set(this.normalize(name), entry)
     this.entries.sort((a, b) => b.avgRating() - a.avgRating())
     return entry
+  }
+}
+
+export class WotrLadder extends Ladder<WotrLadderEntry> {
+  /** Return an initialized new ladder entry, for this ladder */
+  getDefaultEntry (name: string): WotrLadderEntry {
+    return new WotrLadderEntry([0, '', name, 500, 500, 500, 0])
   }
 
   /**
@@ -192,5 +380,70 @@ export class WotrLadder {
       newLoserRating
     ]
     report.annotation = annotation
+  }
+}
+
+export class CardLadder extends Ladder<CardLadderEntry> {
+  /** Return an initialized new ladder entry, for this ladder */
+  getDefaultEntry (name: string): CardLadderEntry {
+    return new CardLadderEntry([0, '', name, 500, 500, 500, 500, 500, 500, 500, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 0, 0])
+  }
+
+  /** Process a game report, adjusting all ladder ranking/ratings accordingly. */
+  processReport (report: CardReport): void {
+    const winningSide = report.winningSide()
+    const losingSide = report.losingSide()
+
+    if (winningSide === '' || losingSide === '') {
+      console.warn(`Could not determine winning side. Skipping.\n${report.row.toString()}`)
+      return
+    }
+
+    const winningRole1: CardRole = winningSide === 'Shadow' ? 'WitchKing' : 'Frodo'
+    const winningRole2: CardRole = winningSide === 'Shadow' ? 'Saruman' : 'Aragorn'
+    const losingRole1: CardRole = losingSide === 'Shadow' ? 'WitchKing' : 'Frodo'
+    const losingRole2: CardRole = losingSide === 'Shadow' ? 'Saruman' : 'Aragorn'
+
+    // Always 2 winners and 2 losers, even if fewer than 4 players.
+    // If there was a single player on the winning side, then both winners are just the same person.
+    const winner1 = this.getEntry(report.getPlayer(winningRole1)) ?? this.addPlayer(report.getPlayer(winningRole1))
+    const winner2 = this.getEntry(report.getPlayer(winningRole2)) ?? this.addPlayer(report.getPlayer(winningRole2))
+    const loser1 = this.getEntry(report.getPlayer(losingRole1)) ?? this.addPlayer(report.getPlayer(losingRole1))
+    const loser2 = this.getEntry(report.getPlayer(losingRole2)) ?? this.addPlayer(report.getPlayer(losingRole2))
+
+    const winner1Rating = winner1.getRating(winningRole1)
+    const winner2Rating = winner2.getRating(winningRole2)
+    const winningTeamRating = (winner1Rating + winner2Rating) / 2
+
+    const loser1Rating = loser1.getRating(losingRole1)
+    const loser2Rating = loser2.getRating(losingRole2)
+    const losingTeamRating = (loser1Rating + loser2Rating) / 2
+
+    const scoreChange = computeEloDiff(winningTeamRating, losingTeamRating)
+
+    console.log(
+      `Winners were ${winner1.name} and ${winner2.name} playing ${winningSide} with a rating of ${winningTeamRating}`
+    )
+    console.log(
+      `Losers were ${loser1.name} and ${loser2.name} playing ${losingSide} with a rating of ${losingTeamRating}`
+    )
+    console.log(`ELO diff will be ${scoreChange}`)
+
+    // Adjust player ratings and re-sort the ladder
+    winner1.setRating(winningRole1, winner1Rating + scoreChange)
+    winner2.setRating(winningRole2, winner2Rating + scoreChange)
+    loser1.setRating(losingRole1, loser1Rating + scoreChange)
+    loser2.setRating(losingRole2, loser2Rating + scoreChange)
+
+    const playerCount = report.playerCount()
+    winner1.incrementGameCount(playerCount)
+    winner2.incrementGameCount(playerCount)
+    loser1.incrementGameCount(playerCount)
+    loser2.incrementGameCount(playerCount)
+
+    winner1.incrementWinCount(winningRole1)
+    winner2.incrementWinCount(winningRole2)
+
+    this.entries.sort((a, b) => b.avgRating() - a.avgRating())
   }
 }

@@ -22,7 +22,7 @@ const VICTORY = [
   'Conceded SP won'
 ] as const
 const isVictory = createTypeGuard(unionParser(VICTORY))
-export type Victory = (typeof VICTORY)[number]
+export type WotrVictory = (typeof VICTORY)[number]
 
 const COMPETITIVE = [
   'Friendly',
@@ -35,7 +35,7 @@ const COMPETITIVE = [
   'Ladder but I cannot remember the stats'
 ] as const
 const isCompetitive = createTypeGuard(unionParser(COMPETITIVE))
-export type Competitive = (typeof COMPETITIVE)[number]
+export type WotrCompetitive = (typeof COMPETITIVE)[number]
 
 const TICK_BOX = [1, ''] as const
 const isTickBox = createTypeGuard(unionParser(TICK_BOX))
@@ -52,8 +52,8 @@ export type WotrReportRow = [
   winner: string,
   loser: string,
   expansion: Expansion,
-  victory: Victory,
-  competitive: Competitive,
+  victory: WotrVictory,
+  competitive: WotrCompetitive,
   cities: YesBox,
   treebeard: YesBox,
   fateErebor: YesBox,

@@ -1,5 +1,5 @@
 /** Main entry-point for update. */
-import { WotrReport, WotrLadder, WotrLadderEntry } from './objects'
+import { WotrReport, WotrLadder, WotrLadderEntry, CardReport, CardLadderEntry, CardLadder } from './objects'
 import {
   WotrFormResponseSheet,
   WotrLadderSheet,
@@ -7,7 +7,8 @@ import {
   WotrReportSheetWithoutStats,
   UpdateSheet,
   CardGameFormResponseSheet,
-  CardReportSheet
+  CardReportSheet,
+  CardLadderSheet
 } from './sheets'
 
 /** Process reports and update ladder for War of the Ring board game. */
@@ -53,14 +54,24 @@ export function updateWotrLadder (): void {
 export function updateCardLadder (): void {
   const updateSheet = new UpdateSheet()
   const responseSheet = new CardGameFormResponseSheet(updateSheet.getBatchSize())
+  const ladderSheet = new CardLadderSheet()
   const reportSheet = new CardReportSheet()
 
   // Read sheet data and build the ladder
-  const reports = responseSheet.readResponses()
+  const reports = responseSheet.readResponses().map((row) => new CardReport(row))
+  const ladderEntries = ladderSheet.readLadder().map((row) => new CardLadderEntry(row))
+  const originalPlayerCount = ladderEntries.length
+  const ladder = new CardLadder(ladderEntries)
 
   // Update the report sheets with new reports
   console.log('Updating Game Reports...')
   reportSheet.updateReports(reports)
+
+  // Update the ladder with new ratings and new players (if any)
+  console.log('Updating Ladder...')
+  const newPlayerCount = ladder.entries.length - originalPlayerCount
+  ladderSheet.prepareNewPlayerRows(originalPlayerCount, newPlayerCount)
+  ladderSheet.writeLadderEntries(ladder)
 
   // Delete processed form responses
   console.log('Removing Processed Form Responses...')
