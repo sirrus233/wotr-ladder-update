@@ -232,7 +232,7 @@ export class CardLadderEntry extends LadderEntry {
   }
 
   /** Increase number of games for a particular player count (e.g. 4-player games played) */
-  incrementGameCount (playerCount: number): void {
+  incrementTotalGameCount (playerCount: number): void {
     switch (playerCount) {
       case 4:
         this.row[10] += 1
@@ -248,6 +248,24 @@ export class CardLadderEntry extends LadderEntry {
         break
       default:
         throw new Error(`Invalid player count: ${playerCount}`)
+    }
+  }
+
+  /** Increase number of games for a particular player count (e.g. 4-player games played) */
+  incrementRoleGameCount (role: CardRole): void {
+    switch (role) {
+      case 'WitchKing':
+        this.row[15] += 1
+        break
+      case 'Saruman':
+        this.row[17] += 1
+        break
+      case 'Frodo':
+        this.row[19] += 1
+        break
+      case 'Aragorn':
+        this.row[21] += 1
+        break
     }
   }
 
@@ -438,15 +456,22 @@ export class CardLadder extends Ladder<CardLadderEntry> {
 
     const playerCount = report.playerCount()
     // Make sure we don't double-update win data when winner1 and winner2 are the same person
-    winner1.incrementGameCount(playerCount)
     winner1.incrementWinCount(winningRole1)
+    winner1.incrementRoleGameCount(winningRole1)
+    winner1.incrementTotalGameCount(playerCount)
+
+    winner2.incrementWinCount(winningRole2)
+    winner2.incrementRoleGameCount(winningRole2)
     if (this.normalize(winner1.name) !== this.normalize(winner2.name)) {
-      winner2.incrementGameCount(playerCount)
-      winner2.incrementWinCount(winningRole2)
+      winner2.incrementTotalGameCount(playerCount)
     }
-    loser1.incrementGameCount(playerCount)
+
+    loser1.incrementRoleGameCount(losingRole1)
+    loser1.incrementTotalGameCount(playerCount)
+
+    loser2.incrementRoleGameCount(losingRole2)
     if (this.normalize(loser1.name) !== this.normalize(loser2.name)) {
-      loser2.incrementGameCount(playerCount)
+      loser2.incrementTotalGameCount(playerCount)
     }
 
     this.entries.sort((a, b) => b.avgRating() - a.avgRating())
