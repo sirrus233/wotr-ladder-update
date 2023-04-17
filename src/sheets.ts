@@ -279,10 +279,11 @@ export class CardLadderSheet extends Sheet {
     // We need to manually compute average scores for the FP and SP sides
     nameRange.setValues(ladder.originalEntries.map((entry) => [entry.name]))
     ratingsRange.setValues(
-      ladder.originalEntries.map((entry) =>
-        entry.row
-          .slice(this.SCRIPT_RATING_COL - 1, this.SCRIPT_RATING_COL - 1 + this.NUM_SCRIPT_RATING_COLS)
-          .concat([entry.getSideRating('Free'), entry.getSideRating('Shadow')])
+      ladder.originalEntries.map(
+        (entry) =>
+          entry.row
+            .slice(this.SCRIPT_RATING_COL - 1, this.SCRIPT_RATING_COL - 1 + 4) // Individual role ratings
+            .concat([entry.getSideRating('Free'), entry.getSideRating('Shadow')]) // Side average ratings
       )
     )
     postRatingsRange.setValues(
