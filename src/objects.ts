@@ -72,26 +72,23 @@ export class CardReport {
   }
 
   /** Which side won */
-  winningSide (): CardSide | '' {
+  winningSide (): CardSide {
     switch (this.victory) {
       case 'FP':
         return 'Free'
       case 'SP':
         return 'Shadow'
-      case 'Two Tower / Return of the King':
-        return ''
     }
+    throw new Error(`Cannot process a ladder game with unknown victory type: ${this.victory}`)
   }
 
   /** Which side lost */
-  losingSide (): CardSide | '' {
+  losingSide (): CardSide {
     switch (this.winningSide()) {
       case 'Free':
         return 'Shadow'
       case 'Shadow':
         return 'Free'
-      case '':
-        return ''
     }
   }
 
@@ -402,11 +399,6 @@ export class CardLadder extends Ladder<CardLadderEntry> {
     const winningSide = report.winningSide()
     const losingSide = report.losingSide()
 
-    if (winningSide === '' || losingSide === '') {
-      console.warn(`Could not determine winning side. Skipping.\n${report.row.toString()}`)
-      return
-    }
-
     const winningRole1: CardRole = winningSide === 'Shadow' ? 'WitchKing' : 'Frodo'
     const winningRole2: CardRole = winningSide === 'Shadow' ? 'Saruman' : 'Aragorn'
     const losingRole1: CardRole = losingSide === 'Shadow' ? 'WitchKing' : 'Frodo'
@@ -438,19 +430,24 @@ export class CardLadder extends Ladder<CardLadderEntry> {
     console.log(`ELO diff will be ${scoreChange}`)
 
     // Adjust player ratings and re-sort the ladder
+    // When both players on a side are the same person, they get the Elo adjustment to both roles
     winner1.setRating(winningRole1, winner1Rating + scoreChange)
     winner2.setRating(winningRole2, winner2Rating + scoreChange)
     loser1.setRating(losingRole1, loser1Rating - scoreChange)
     loser2.setRating(losingRole2, loser2Rating - scoreChange)
 
     const playerCount = report.playerCount()
+    // Make sure we don't double-update win data when winner1 and winner2 are the same person
     winner1.incrementGameCount(playerCount)
-    winner2.incrementGameCount(playerCount)
-    loser1.incrementGameCount(playerCount)
-    loser2.incrementGameCount(playerCount)
-
     winner1.incrementWinCount(winningRole1)
-    winner2.incrementWinCount(winningRole2)
+    if (this.normalize(winner1.name) !== this.normalize(winner2.name)) {
+      winner2.incrementGameCount(playerCount)
+      winner2.incrementWinCount(winningRole2)
+    }
+    loser1.incrementGameCount(playerCount)
+    if (this.normalize(loser1.name) !== this.normalize(loser2.name)) {
+      loser2.incrementGameCount(playerCount)
+    }
 
     this.entries.sort((a, b) => b.avgRating() - a.avgRating())
   }
