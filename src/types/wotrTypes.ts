@@ -4,22 +4,10 @@
  * Google's APIs return untyped data. Getting cell values is generally type any[][], representing an array of rows
  * where each row is an array of anything. Since the data in the sheet is structured in a known format, these parsers,
  * types, and guards let us deal with the data in a strongly typed way.
+ *
+ * Types for the WotR Board Game
  */
-
-/** A function which maps an unknown value to a concretely typed one. */
-type Parser<T> = (val: unknown) => T | null
-
-/** Factory function to create a Parser for a type union of literals, given an array of the union's variants.  */
-function unionParser<T> (variants: readonly T[]): Parser<T> {
-  return (val: unknown) => (variants.includes(val as T) ? (val as T) : null)
-}
-
-/** A function which takes a parser and returns a new function that is a safe type guard for T. */
-const createTypeGuard =
-  <T>(parse: Parser<T>) =>
-    (value: unknown): value is T => {
-      return parse(value) !== null
-    }
+import { unionParser, createTypeGuard } from './types'
 
 const EXPANSION = ['Base', 'LoME', 'WoME', 'LoME+WoME'] as const
 const isExpansion = createTypeGuard(unionParser(EXPANSION))
@@ -34,7 +22,7 @@ const VICTORY = [
   'Conceded SP won'
 ] as const
 const isVictory = createTypeGuard(unionParser(VICTORY))
-export type Victory = (typeof VICTORY)[number]
+export type WotrVictory = (typeof VICTORY)[number]
 
 const COMPETITIVE = [
   'Friendly',
@@ -47,7 +35,7 @@ const COMPETITIVE = [
   'Ladder but I cannot remember the stats'
 ] as const
 const isCompetitive = createTypeGuard(unionParser(COMPETITIVE))
-export type Competitive = (typeof COMPETITIVE)[number]
+export type WotrCompetitive = (typeof COMPETITIVE)[number]
 
 const TICK_BOX = [1, ''] as const
 const isTickBox = createTypeGuard(unionParser(TICK_BOX))
@@ -57,15 +45,15 @@ const YES_BOX = ['Yes', ''] as const
 const isYesBox = createTypeGuard(unionParser(YES_BOX))
 export type YesBox = (typeof YES_BOX)[number]
 
-export const REPORT_ROW_LENGTH = 47
-export type ReportRow = [
+export const WOTR_REPORT_ROW_LENGTH = 47
+export type WotrReportRow = [
   timestamp: Date,
   turns: number,
   winner: string,
   loser: string,
   expansion: Expansion,
-  victory: Victory,
-  competitive: Competitive,
+  victory: WotrVictory,
+  competitive: WotrCompetitive,
   cities: YesBox,
   treebeard: YesBox,
   fateErebor: YesBox,
@@ -107,13 +95,13 @@ export type ReportRow = [
   ereborFate: TickBox,
   ironHillsFate: TickBox
 ]
-export function parseReportRow (val: unknown): ReportRow {
+export function parseWotrReportRow (val: unknown): WotrReportRow {
   const valStr = val as string
   if (!Array.isArray(val)) {
     throw new Error(`Error in game report. Value is not an array.\n${valStr}`)
   }
-  if (val.length !== REPORT_ROW_LENGTH) {
-    throw new Error(`Error in game report. Expected ${REPORT_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
+  if (val.length !== WOTR_REPORT_ROW_LENGTH) {
+    throw new Error(`Error in game report. Expected ${WOTR_REPORT_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
   }
   if (Object.prototype.toString.call(val[0]) !== '[object Date]') {
     throw new Error(`Error in game report at field [0]. Expected 'Date'. Got ${typeof val[0]}.\n${valStr}`)
@@ -256,15 +244,15 @@ export function parseReportRow (val: unknown): ReportRow {
   if (!isTickBox(val[46])) {
     throw new Error(`Error in game report at field [46]. Expected TickBox. Got ${typeof val[46]}.\n${valStr}`)
   }
-  const report = val as ReportRow
+  const report = val as WotrReportRow
   // Remove leading/trailing whitespace from reported winner/loser names
   report[2] = report[2].trim()
   report[3] = report[3].trim()
   return report
 }
 
-export const LADDER_ROW_LENGTH = 7
-export type LadderRow = [
+export const WOTR_LADDER_ROW_LENGTH = 7
+export type WotrLadderRow = [
   rank: number,
   flag: unknown, // This is a CellImage. Google doesn't seem to publish this type? I couldn't find it.
   name: string,
@@ -273,7 +261,7 @@ export type LadderRow = [
   freeRating: number,
   gamesPlayed: number
 ]
-export function parseLadderRow (val: unknown): LadderRow {
+export function parseWotrLadderRow (val: unknown): WotrLadderRow {
   // Check if a line represents the ladder entry that divides active and inactive players.
   // This is a bit of a workaround -- this row (and this row only) has a value of '' for shadowRating, freeRating,
   // and gamesPlayed. Since the row is never *accessed* by the ladder update process, we don't really want to make these
@@ -287,8 +275,8 @@ export function parseLadderRow (val: unknown): LadderRow {
   if (!Array.isArray(val)) {
     throw new Error(`Error in ladder entry. Value is not an array.\n${valStr}`)
   }
-  if (val.length !== LADDER_ROW_LENGTH) {
-    throw new Error(`Error in ladder entry. Expected ${LADDER_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
+  if (val.length !== WOTR_LADDER_ROW_LENGTH) {
+    throw new Error(`Error in ladder entry. Expected ${WOTR_LADDER_ROW_LENGTH} entries. Got ${val.length}.\n${valStr}`)
   }
   if (typeof val[0] !== 'number') {
     throw new Error(`Error in ladder entry at field [0]. Expected 'number'. Got ${typeof val[0]}.\n${valStr}`)
@@ -309,13 +297,13 @@ export function parseLadderRow (val: unknown): LadderRow {
   if (typeof val[6] !== 'number' && !isNotActiveDivider(val)) {
     throw new Error(`Error in ladder entry at field [6]. Expected 'number'. Got ${typeof val[6]}.\n${valStr}`)
   }
-  const entry = val as LadderRow
+  const entry = val as WotrLadderRow
   // Remove leading/trailing whitespace from player name
   entry[2] = entry[2].trim()
   return entry
 }
 
-export type Side = 'Shadow' | 'Free'
+export type WotrSide = 'Shadow' | 'Free'
 
 export type Annotation = [
   winnerGamesPlayed: number,

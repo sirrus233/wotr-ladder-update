@@ -5,15 +5,33 @@
  * runtime to the update script.
  */
 
-import { WotrReport, WotrLadder } from './objects'
-import { LADDER_ROW_LENGTH, LadderRow, REPORT_ROW_LENGTH, ReportRow, parseLadderRow, parseReportRow } from './types'
+import { WotrReport, WotrLadder, CardLadder, CardReport } from './objects'
+import {
+  CARD_LADDER_ROW_LENGTH,
+  CARD_REPORT_ROW_LENGTH,
+  CardLadderRow,
+  CardReportRow,
+  parseCardLadderRow,
+  parseCardReportRow
+} from './types/cardGameTypes'
+import {
+  WOTR_LADDER_ROW_LENGTH,
+  WotrLadderRow,
+  WOTR_REPORT_ROW_LENGTH,
+  WotrReportRow,
+  parseWotrLadderRow,
+  parseWotrReportRow
+} from './types/wotrTypes'
 
 // A sheet is accessed by its string name. Important sheets are catalogued here.
 const UPDATE_SHEET = 'Update'
-const FORM_RESPONSES_SHEET = 'wotr form response'
+const WOTR_FORM_RESPONSES_SHEET = 'wotr form response'
+const CARD_FORM_RESPONSES_SHEET = 'Card game responses'
 const GAME_REPORTS_SHEET = 'WotR Reports'
+const CARD_REPORTS_SHEET = 'Card Game Reports'
 const GAME_REPORTS_WITHOUT_STATS_SHEET = 'Ladder Games with no stats'
-const LADDER_SHEET = 'WOTR ladder'
+const WOTR_LADDER_SHEET = 'WOTR ladder'
+const CARD_LADDER_SHEET = 'Card Game 2023 ladder'
 
 /**
  * Base class for all Sheets.
@@ -61,9 +79,11 @@ export class UpdateSheet extends Sheet {
 }
 
 /** Has the output of the form players use to report their games. This is where games live before they are processed. */
-export class FormResponseSheet extends Sheet {
-  protected readonly _sheetName = FORM_RESPONSES_SHEET
-  private readonly HEADERS = 1
+abstract class FormResponseSheet<T> extends Sheet {
+  protected abstract readonly _sheetName: string
+  protected abstract readonly _parser: (val: unknown) => T
+  protected abstract readonly HEADERS: number
+  protected abstract readonly ROW_LENGTH: number
   /**
    * Form responses are processed in batches, primarily due to legacy behavior where it took a very long time
    * to process large numbers of reports. Batch processing is supported here, and the size of the batch must be
@@ -80,7 +100,7 @@ export class FormResponseSheet extends Sheet {
    * Read a batch of responses from the sheet. NOTE: If there are fewer responses than the object's batchSize, then the
    * batchSize is automatically adjusted down to match the total number of responses.
    */
-  readResponses (): ReportRow[] {
+  readResponses (): T[] {
     if (this._batchSize === 0) {
       return []
     }
@@ -96,8 +116,8 @@ export class FormResponseSheet extends Sheet {
     if (numReports < this._batchSize) {
       this._batchSize = numReports
     }
-    const responseRange = this.sheet.getRange(this.HEADERS + 1, 1, this._batchSize, REPORT_ROW_LENGTH)
-    return responseRange.getValues().map(parseReportRow)
+    const responseRange = this.sheet.getRange(this.HEADERS + 1, 1, this._batchSize, this.ROW_LENGTH)
+    return responseRange.getValues().map(this._parser)
   }
 
   /** Delete a batch of responses. */
@@ -110,9 +130,23 @@ export class FormResponseSheet extends Sheet {
   }
 }
 
+export class WotrFormResponseSheet extends FormResponseSheet<WotrReportRow> {
+  protected readonly _sheetName = WOTR_FORM_RESPONSES_SHEET
+  protected readonly _parser = parseWotrReportRow
+  protected readonly HEADERS = 1
+  protected readonly ROW_LENGTH = WOTR_REPORT_ROW_LENGTH
+}
+
+export class CardGameFormResponseSheet extends FormResponseSheet<CardReportRow> {
+  protected readonly _sheetName = CARD_FORM_RESPONSES_SHEET
+  protected readonly _parser = parseCardReportRow
+  protected readonly HEADERS = 1
+  protected readonly ROW_LENGTH = CARD_REPORT_ROW_LENGTH
+}
+
 /** The ladder that tracks players and their ranks and ratings. */
-export class LadderSheet extends Sheet {
-  protected readonly _sheetName = LADDER_SHEET
+export class WotrLadderSheet extends Sheet {
+  protected readonly _sheetName = WOTR_LADDER_SHEET
   private readonly HEADERS = 3
   // Some columns have important semantics
   private readonly FLAG_COL = 2 // Player's national flag
@@ -122,15 +156,15 @@ export class LadderSheet extends Sheet {
   private readonly ACTIVE_RATING_COL = 30 // "Active rating", a modified rating used for sorting
 
   /** Read all player entries from the ladder */
-  readLadder (): LadderRow[] {
+  readLadder (): WotrLadderRow[] {
     // Most of the ladder is managed by sheet formulas automatically, so we don't need to grab entire rows.
     // It is sufficient to grab name + rating information
-    const ladderRange = this.sheet.getRange(this.HEADERS + 1, 1, this.sheet.getLastRow(), LADDER_ROW_LENGTH)
+    const ladderRange = this.sheet.getRange(this.HEADERS + 1, 1, this.sheet.getLastRow(), WOTR_LADDER_ROW_LENGTH)
     const ladderValues = ladderRange.getValues()
     // The sheet has a footer that will get picked up when parsing. We need to find and drop any trailing rows that do
     // not represent players.
     const numPlayers = ladderValues.findIndex((row) => row[0] === '')
-    return ladderValues.slice(0, numPlayers).map(parseLadderRow)
+    return ladderValues.slice(0, numPlayers).map(parseWotrLadderRow)
   }
 
   /**
@@ -150,6 +184,9 @@ export class LadderSheet extends Sheet {
     const lastEntryRange = this.sheet.getRange(this.HEADERS + originalPlayers, 1, 1, sheetWidth)
     const newPlayerEntriesRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, 1, newPlayers, sheetWidth)
     lastEntryRange.copyTo(newPlayerEntriesRange, SpreadsheetApp.CopyPasteType.PASTE_FORMULA, false)
+    // Finally, since flags are stored as an image() formula, we need to clear that data.
+    const newPlayerFlagsRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, this.FLAG_COL, newPlayers, 1)
+    newPlayerFlagsRange.clearContent()
   }
 
   /** Write data back to the ladder, overwriting its current state. */
@@ -175,8 +212,98 @@ export class LadderSheet extends Sheet {
   }
 }
 
+/** The ladder that tracks players and their ranks and ratings. */
+export class CardLadderSheet extends Sheet {
+  protected readonly _sheetName = CARD_LADDER_SHEET
+  private readonly HEADERS = 3
+  // Some columns have important semantics
+  private readonly FLAG_COL = 2 // Player's national flag
+  private readonly NAME_COL = 3 // Player's name
+  private readonly RATING_COL = 4 // Player's average rating
+  private readonly SCRIPT_RATING_COL = 5 // First rating column managed by this script
+  private readonly NUM_SCRIPT_RATING_COLS = 6 // Number of consecutive rating columns managed by this script
+  private readonly POST_RATING_COL = 11 // First column after ratings that is managed by this script
+  private readonly NUM_POST_RATING_COLS = CARD_LADDER_ROW_LENGTH - this.POST_RATING_COL + 1
+
+  /** Read all player entries from the ladder */
+  readLadder (): CardLadderRow[] {
+    const ladderRange = this.sheet.getRange(this.HEADERS + 1, 1, this.sheet.getLastRow(), CARD_LADDER_ROW_LENGTH)
+    const ladderValues = ladderRange.getValues()
+    // The sheet has a footer that will get picked up when parsing. We need to find and drop any trailing rows that do
+    // not represent players.
+    const numPlayers = ladderValues.findIndex((row) => row[0] === '')
+    return ladderValues.slice(0, numPlayers).map(parseCardLadderRow)
+  }
+
+  /**
+   * Add space in the ladder for new players, retaining the standard ladder formatting. This function must be told
+   * how many players there originally were (to avoid re-querying), and how many players are being added.
+   */
+  prepareNewPlayerRows (originalPlayers: number, newPlayers: number): void {
+    if (newPlayers === 0) {
+      return
+    }
+
+    // Insert new rows at the bottom of the ladder, below the last player and above the footer.
+    // A row insert like this preserves the formatting of the prior row.
+    this.sheet.insertRowsAfter(this.HEADERS + originalPlayers, newPlayers)
+    // We now copy the formulas from the last player in the ladder into the rows of each new player we just created.
+    const sheetWidth = this.sheet.getMaxColumns()
+    const lastEntryRange = this.sheet.getRange(this.HEADERS + originalPlayers, 1, 1, sheetWidth)
+    const newPlayerEntriesRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, 1, newPlayers, sheetWidth)
+    lastEntryRange.copyTo(newPlayerEntriesRange, SpreadsheetApp.CopyPasteType.PASTE_FORMULA, false)
+    // Finally, since flags are stored as an image() formula, we need to clear that data.
+    const newPlayerFlagsRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, this.FLAG_COL, newPlayers, 1)
+    newPlayerFlagsRange.clearContent()
+  }
+
+  /** Write data back to the ladder, overwriting its current state. */
+  writeLadderEntries (ladder: CardLadder): void {
+    // We need to be careful to only overwrite the data this script is supposed to manage, and leave any sheet formulae
+    // alone. This means computing ranges for player names, and their rating information.
+    const entryCount = ladder.originalEntries.length
+    const nameRange = this.sheet.getRange(this.HEADERS + 1, this.NAME_COL, entryCount, 1)
+    const ratingsRange = this.sheet.getRange(
+      this.HEADERS + 1,
+      this.SCRIPT_RATING_COL,
+      entryCount,
+      this.NUM_SCRIPT_RATING_COLS
+    )
+    const postRatingsRange = this.sheet.getRange(
+      this.HEADERS + 1,
+      this.POST_RATING_COL,
+      entryCount,
+      this.NUM_POST_RATING_COLS
+    )
+    // Write data in the same order it was read, with new players at the end.
+    // We need to manually compute average scores for the FP and SP sides
+    nameRange.setValues(ladder.originalEntries.map((entry) => [entry.name]))
+    ratingsRange.setValues(
+      ladder.originalEntries.map(
+        (entry) =>
+          entry.row
+            .slice(this.SCRIPT_RATING_COL - 1, this.SCRIPT_RATING_COL - 1 + 4) // Individual role ratings
+            .concat([entry.getSideRating('Free'), entry.getSideRating('Shadow')]) // Side average ratings
+      )
+    )
+    postRatingsRange.setValues(
+      ladder.originalEntries.map((entry) =>
+        entry.row.slice(this.POST_RATING_COL - 1, this.POST_RATING_COL - 1 + this.NUM_POST_RATING_COLS)
+      )
+    )
+    // Finally, we sort the ladder. We need to sort entire rows, but only the player entry ones (not the header or
+    // footer), and only from the right of the "Rank" column (which is the left-most) since it is generated by formula.
+    // That's why we have this kind of funky-looking range here.
+    SpreadsheetApp.flush() // We need to kick the sheet here, so the sort can see the updated values.
+    const sheetWidth = this.sheet.getMaxColumns()
+    const sheetWidthWithoutRank = sheetWidth - 1
+    const sortRange = this.sheet.getRange(this.HEADERS + 1, this.FLAG_COL, entryCount, sheetWidthWithoutRank)
+    sortRange.sort({ column: this.RATING_COL, ascending: false })
+  }
+}
+
 /** Game reports and their statistics that have been processed. */
-export class ReportSheet extends Sheet {
+export class WotrReportSheet extends Sheet {
   protected readonly _sheetName = GAME_REPORTS_SHEET
   private readonly HEADERS = 1
   /**
@@ -217,7 +344,7 @@ export class ReportSheet extends Sheet {
 }
 
 /** Processed game reports where the players could not remember the game stats. */
-export class ReportSheetWithoutStats extends Sheet {
+export class WotrReportSheetWithoutStats extends Sheet {
   protected readonly _sheetName = GAME_REPORTS_WITHOUT_STATS_SHEET
   private readonly HEADERS = 1
   private readonly DATA_START_COL = 2
@@ -235,5 +362,27 @@ export class ReportSheetWithoutStats extends Sheet {
     const newReportsDataRange = this.sheet.getRange(this.HEADERS + 1, this.DATA_START_COL, reports.length, reportWidth)
     newReportsDataRange.setValues(reports.map((report) => report.row))
     this.sheet.sort(this.DATA_START_COL, false)
+  }
+}
+
+/** Game reports and their statistics that have been processed. */
+export class CardReportSheet extends Sheet {
+  protected readonly _sheetName = CARD_REPORTS_SHEET
+  private readonly HEADERS = 1
+
+  /** Update with new reports, appended to the top of the sheet. */
+  updateReports (reports: CardReport[]): void {
+    if (reports.length === 0) {
+      return
+    }
+
+    const reportWidth = reports[0].row.length
+    // Add a new row for each report.
+    this.sheet.insertRowsBefore(this.HEADERS + 1, reports.length)
+    // Write reports into the sheet
+    this.sheet.getRange(this.HEADERS + 1, 1, reports.length, reportWidth).setValues(reports.map((report) => report.row))
+    // Sort the sheet by the first data column, which should be Timestamp. Most recent reports should be at the top.
+    // We need to make sure to ignore the header.
+    this.sheet.getDataRange().offset(1, 0).sort({ column: 1, ascending: false })
   }
 }
