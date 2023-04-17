@@ -68,7 +68,7 @@ export class CardReport {
 
   /** Was this game played competitively */
   isLadderGame (): boolean {
-    return this.competitive.startsWith('Ladder')
+    return this.competitive.startsWith('Ladder') && this.victory !== 'Two Tower / Return of the King'
   }
 
   /** Which side won */
