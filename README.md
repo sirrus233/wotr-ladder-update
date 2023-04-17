@@ -1,4 +1,4 @@
-# wotr-ladder-update
+# wotr-ladder-update 💍🪜
 Management scripts for the War of the Ring community competitive ladder.
 
 This script runs directly from the Google Sheet, and is triggered there by ladder managers.
