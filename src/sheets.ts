@@ -184,6 +184,9 @@ export class WotrLadderSheet extends Sheet {
     const lastEntryRange = this.sheet.getRange(this.HEADERS + originalPlayers, 1, 1, sheetWidth)
     const newPlayerEntriesRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, 1, newPlayers, sheetWidth)
     lastEntryRange.copyTo(newPlayerEntriesRange, SpreadsheetApp.CopyPasteType.PASTE_FORMULA, false)
+    // Finally, since flags are stored as an image() formula, we need to clear that data.
+    const newPlayerFlagsRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, this.FLAG_COL, newPlayers, 1)
+    newPlayerFlagsRange.clearContent()
   }
 
   /** Write data back to the ladder, overwriting its current state. */
@@ -249,6 +252,9 @@ export class CardLadderSheet extends Sheet {
     const lastEntryRange = this.sheet.getRange(this.HEADERS + originalPlayers, 1, 1, sheetWidth)
     const newPlayerEntriesRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, 1, newPlayers, sheetWidth)
     lastEntryRange.copyTo(newPlayerEntriesRange, SpreadsheetApp.CopyPasteType.PASTE_FORMULA, false)
+    // Finally, since flags are stored as an image() formula, we need to clear that data.
+    const newPlayerFlagsRange = this.sheet.getRange(this.HEADERS + originalPlayers + 1, this.FLAG_COL, newPlayers, 1)
+    newPlayerFlagsRange.clearContent()
   }
 
   /** Write data back to the ladder, overwriting its current state. */
