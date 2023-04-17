@@ -175,36 +175,44 @@ export class CardLadderEntry extends LadderEntry {
   row: CardLadderRow
   /** The player's name. */
   name: string
-  witchKingRating: number
-  sarumanRating: number
-  frodoRating: number
-  aragornRating: number
 
   constructor (row: CardLadderRow) {
     super()
     this.row = row
     this.name = row[2]
-    this.witchKingRating = row[5]
-    this.sarumanRating = row[6]
-    this.frodoRating = row[7]
-    this.aragornRating = row[8]
   }
 
   avgRating (): number {
-    return (this.witchKingRating + this.sarumanRating + this.frodoRating + this.aragornRating) / 4
+    const ratings =
+      this.getRoleRating('WitchKing') +
+      this.getRoleRating('Saruman') +
+      this.getRoleRating('Frodo') +
+      this.getRoleRating('Aragorn')
+
+    return ratings / 4
   }
 
   /** Return this player's rating for a particular Role. */
-  getRating (role: CardRole): number {
+  getRoleRating (role: CardRole): number {
     switch (role) {
       case 'WitchKing':
-        return this.witchKingRating
+        return this.row[4]
       case 'Saruman':
-        return this.sarumanRating
+        return this.row[5]
       case 'Frodo':
-        return this.frodoRating
+        return this.row[6]
       case 'Aragorn':
-        return this.aragornRating
+        return this.row[7]
+    }
+  }
+
+  /** Return this player's rating for a particular Side. */
+  getSideRating (side: CardSide): number {
+    switch (side) {
+      case 'Free':
+        return (this.getRoleRating('Frodo') + this.getRoleRating('Aragorn')) / 2
+      case 'Shadow':
+        return (this.getRoleRating('WitchKing') + this.getRoleRating('Saruman')) / 2
     }
   }
 
@@ -212,16 +220,16 @@ export class CardLadderEntry extends LadderEntry {
   setRating (role: CardRole, value: number): void {
     switch (role) {
       case 'WitchKing':
-        this.witchKingRating = value
+        this.row[4] = value
         break
       case 'Saruman':
-        this.sarumanRating = value
+        this.row[5] = value
         break
       case 'Frodo':
-        this.frodoRating = value
+        this.row[6] = value
         break
       case 'Aragorn':
-        this.aragornRating = value
+        this.row[7] = value
         break
     }
   }
@@ -411,12 +419,12 @@ export class CardLadder extends Ladder<CardLadderEntry> {
     const loser1 = this.getEntry(report.getPlayer(losingRole1)) ?? this.addPlayer(report.getPlayer(losingRole1))
     const loser2 = this.getEntry(report.getPlayer(losingRole2)) ?? this.addPlayer(report.getPlayer(losingRole2))
 
-    const winner1Rating = winner1.getRating(winningRole1)
-    const winner2Rating = winner2.getRating(winningRole2)
+    const winner1Rating = winner1.getRoleRating(winningRole1)
+    const winner2Rating = winner2.getRoleRating(winningRole2)
     const winningTeamRating = (winner1Rating + winner2Rating) / 2
 
-    const loser1Rating = loser1.getRating(losingRole1)
-    const loser2Rating = loser2.getRating(losingRole2)
+    const loser1Rating = loser1.getRoleRating(losingRole1)
+    const loser2Rating = loser2.getRoleRating(losingRole2)
     const losingTeamRating = (loser1Rating + loser2Rating) / 2
 
     const scoreChange = computeEloDiff(winningTeamRating, losingTeamRating)

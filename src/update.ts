@@ -63,6 +63,14 @@ export function updateCardLadder (): void {
   const originalPlayerCount = ladderEntries.length
   const ladder = new CardLadder(ladderEntries)
 
+  // Process all the ladder games in the batch
+  console.log('Processing games...')
+  reports
+    .filter((report) => report.isLadderGame())
+    .forEach((report) => {
+      ladder.processReport(report)
+    })
+
   // Update the report sheets with new reports
   console.log('Updating Game Reports...')
   reportSheet.updateReports(reports)
