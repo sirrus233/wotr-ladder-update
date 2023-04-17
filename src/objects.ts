@@ -440,8 +440,8 @@ export class CardLadder extends Ladder<CardLadderEntry> {
     // Adjust player ratings and re-sort the ladder
     winner1.setRating(winningRole1, winner1Rating + scoreChange)
     winner2.setRating(winningRole2, winner2Rating + scoreChange)
-    loser1.setRating(losingRole1, loser1Rating + scoreChange)
-    loser2.setRating(losingRole2, loser2Rating + scoreChange)
+    loser1.setRating(losingRole1, loser1Rating - scoreChange)
+    loser2.setRating(losingRole2, loser2Rating - scoreChange)
 
     const playerCount = report.playerCount()
     winner1.incrementGameCount(playerCount)
