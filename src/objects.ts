@@ -295,14 +295,14 @@ abstract class Ladder<T extends LadderEntry> {
    * Array if games with new players are processed, but the relative order is never changed.
    */
   originalEntries: T[]
-  /** Ladder entries sorted by ranked order (e.g. highest rated player first, etc.). */
+  /** Ladder entries sorted by ranked order (e.g. highest rated player first). Does not include inactive players. */
   entries: T[]
   /** Lookup table for ladder entries, keyed by normalized player name. */
   entryMap: Map<string, T>
 
   constructor (entries: T[]) {
     this.originalEntries = [...entries]
-    this.entries = entries
+    this.entries = entries.slice(0, entries.map((entry) => entry.name).indexOf('NOT ACTIVE PLAYERS'))
     this.entryMap = new Map(entries.map((entry) => [this.normalize(entry.name), entry]))
   }
 
@@ -329,10 +329,9 @@ abstract class Ladder<T extends LadderEntry> {
   getRank (name: string): number {
     const normalizedName = this.normalize(name)
     const rank = this.entries.findIndex((entry) => this.normalize(entry.name) === normalizedName)
-    if (rank < 0) {
-      throw new Error(`No entry in ladder for player ${name}`)
-    }
-    return rank + 1 // +1 accounts for zero-indexing of the array
+    // +1 accounts for zero-indexing of the array
+    // Players not found in the sorted entries (inactive players) will show a rank of 0
+    return rank + 1
   }
 
   /**
