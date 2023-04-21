@@ -41,7 +41,7 @@ export function updateWotrLadder (): void {
 
   // Update the ladder with new ratings and new players (if any)
   console.log('Updating Ladder...')
-  const newPlayerCount = ladder.entries.length - originalPlayerCount
+  const newPlayerCount = ladder.originalEntries.length - originalPlayerCount
   ladderSheet.prepareNewPlayerRows(originalPlayerCount, newPlayerCount)
   ladderSheet.writeLadderEntries(ladder)
 
@@ -77,7 +77,7 @@ export function updateCardLadder (): void {
 
   // Update the ladder with new ratings and new players (if any)
   console.log('Updating Ladder...')
-  const newPlayerCount = ladder.entries.length - originalPlayerCount
+  const newPlayerCount = ladder.originalEntries.length - originalPlayerCount
   ladderSheet.prepareNewPlayerRows(originalPlayerCount, newPlayerCount)
   ladderSheet.writeLadderEntries(ladder)
 
