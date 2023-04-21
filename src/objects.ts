@@ -302,7 +302,8 @@ abstract class Ladder<T extends LadderEntry> {
 
   constructor (entries: T[]) {
     this.originalEntries = [...entries]
-    this.entries = entries.slice(0, entries.map((entry) => entry.name).indexOf('NOT ACTIVE PLAYERS'))
+    const notActiveMarkerIndex = entries.map((entry) => entry.name).indexOf('NOT ACTIVE PLAYERS')
+    this.entries = notActiveMarkerIndex < 0 ? entries : this.entries = entries.slice(0, notActiveMarkerIndex)
     this.entryMap = new Map(entries.map((entry) => [this.normalize(entry.name), entry]))
   }
 
