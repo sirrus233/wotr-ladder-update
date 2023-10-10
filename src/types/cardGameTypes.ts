@@ -47,7 +47,7 @@ export type CardReportRow = [
   promo: YesNo,
   players: number,
   gameType: CardGameType | '',
-  corruption: number | ''
+  corruption: number | '6+' | ''
 ]
 export function parseCardReportRow (val: unknown): CardReportRow {
   const valStr = val as string
@@ -97,7 +97,7 @@ export function parseCardReportRow (val: unknown): CardReportRow {
   if (!isGameType(val[12]) && val[12] !== '') {
     throw new Error(`Error in game report at field [12]. Expected GameType or ''. Got ${typeof val[12]}.\n${valStr}`)
   }
-  if (typeof val[13] !== 'number' && val[13] !== '') {
+  if ((typeof val[13] !== 'number' && val[13] !== '' && val[13] !== '6+')) {
     throw new Error(`Error in game report at field [13]. Expected number or ''. Got ${typeof val[13]}.\n${valStr}`)
   }
   const entry = val as CardReportRow
@@ -109,7 +109,7 @@ export function parseCardReportRow (val: unknown): CardReportRow {
   return entry
 }
 
-export const CARD_LADDER_ROW_LENGTH = 23
+export const CARD_LADDER_ROW_LENGTH = 14
 export type CardLadderRow = [
   rank: number,
   flag: unknown, // This is a CellImage. Google doesn't seem to publish this type? I couldn't find it.
@@ -125,15 +125,6 @@ export type CardLadderRow = [
   gamesPlayed4: number,
   gamesPlayed3: number,
   gamesPlayed2: number,
-  fellowship: '',
-  witchKingGames: number,
-  witchKingWins: number,
-  sarumanGames: number,
-  sarumanWins: number,
-  frodoGames: number,
-  frodoWins: number,
-  aragornGames: number,
-  aragornWins: number
 ]
 export function parseCardLadderRow (val: unknown): CardLadderRow {
   const valStr = val as string
@@ -183,33 +174,6 @@ export function parseCardLadderRow (val: unknown): CardLadderRow {
   }
   if (typeof val[13] !== 'number') {
     throw new Error(`Error in ladder entry at field [13]. Expected 'number'. Got ${typeof val[13]}.\n${valStr}`)
-  }
-  if (val[14] !== '') {
-    throw new Error(`Error in ladder entry at field [14]. Expected ''. Got ${typeof val[14]}.\n${valStr}`)
-  }
-  if (typeof val[15] !== 'number') {
-    throw new Error(`Error in ladder entry at field [15]. Expected 'number'. Got ${typeof val[15]}.\n${valStr}`)
-  }
-  if (typeof val[16] !== 'number') {
-    throw new Error(`Error in ladder entry at field [16]. Expected 'number'. Got ${typeof val[16]}.\n${valStr}`)
-  }
-  if (typeof val[17] !== 'number') {
-    throw new Error(`Error in ladder entry at field [17]. Expected 'number'. Got ${typeof val[17]}.\n${valStr}`)
-  }
-  if (typeof val[18] !== 'number') {
-    throw new Error(`Error in ladder entry at field [18]. Expected 'number'. Got ${typeof val[18]}.\n${valStr}`)
-  }
-  if (typeof val[19] !== 'number') {
-    throw new Error(`Error in ladder entry at field [19]. Expected 'number'. Got ${typeof val[19]}.\n${valStr}`)
-  }
-  if (typeof val[20] !== 'number') {
-    throw new Error(`Error in ladder entry at field [20]. Expected 'number'. Got ${typeof val[20]}.\n${valStr}`)
-  }
-  if (typeof val[21] !== 'number') {
-    throw new Error(`Error in ladder entry at field [21]. Expected 'number'. Got ${typeof val[21]}.\n${valStr}`)
-  }
-  if (typeof val[22] !== 'number') {
-    throw new Error(`Error in ladder entry at field [22]. Expected 'number'. Got ${typeof val[22]}.\n${valStr}`)
   }
   const entry = val as CardLadderRow
   // Remove leading/trailing whitespace from player name

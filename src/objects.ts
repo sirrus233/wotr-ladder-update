@@ -250,42 +250,6 @@ export class CardLadderEntry extends LadderEntry {
         throw new Error(`Invalid player count: ${playerCount}`)
     }
   }
-
-  /** Increase number of games for a particular player count (e.g. 4-player games played) */
-  incrementRoleGameCount (role: CardRole): void {
-    switch (role) {
-      case 'WitchKing':
-        this.row[15] += 1
-        break
-      case 'Saruman':
-        this.row[17] += 1
-        break
-      case 'Frodo':
-        this.row[19] += 1
-        break
-      case 'Aragorn':
-        this.row[21] += 1
-        break
-    }
-  }
-
-  /** Increase number of wins for a particular role */
-  incrementWinCount (role: CardRole): void {
-    switch (role) {
-      case 'WitchKing':
-        this.row[16] += 1
-        break
-      case 'Saruman':
-        this.row[18] += 1
-        break
-      case 'Frodo':
-        this.row[20] += 1
-        break
-      case 'Aragorn':
-        this.row[22] += 1
-        break
-    }
-  }
 }
 
 /** Representation of the entire ladder system. */
@@ -409,7 +373,7 @@ export class WotrLadder extends Ladder<WotrLadderEntry> {
 export class CardLadder extends Ladder<CardLadderEntry> {
   /** Return an initialized new ladder entry, for this ladder */
   getDefaultEntry (name: string): CardLadderEntry {
-    return new CardLadderEntry([0, '', name, 500, 500, 500, 500, 500, 500, 500, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 0, 0])
+    return new CardLadderEntry([0, '', name, 500, 500, 500, 500, 500, 500, 500, 0, 0, 0, 0])
   }
 
   /** Process a game report, adjusting all ladder ranking/ratings accordingly. */
@@ -456,20 +420,12 @@ export class CardLadder extends Ladder<CardLadderEntry> {
 
     const playerCount = report.playerCount()
     // Make sure we don't double-update win data when winner1 and winner2 are the same person
-    winner1.incrementWinCount(winningRole1)
-    winner1.incrementRoleGameCount(winningRole1)
     winner1.incrementTotalGameCount(playerCount)
-
-    winner2.incrementWinCount(winningRole2)
-    winner2.incrementRoleGameCount(winningRole2)
     if (this.normalize(winner1.name) !== this.normalize(winner2.name)) {
       winner2.incrementTotalGameCount(playerCount)
     }
 
-    loser1.incrementRoleGameCount(losingRole1)
     loser1.incrementTotalGameCount(playerCount)
-
-    loser2.incrementRoleGameCount(losingRole2)
     if (this.normalize(loser1.name) !== this.normalize(loser2.name)) {
       loser2.incrementTotalGameCount(playerCount)
     }

@@ -221,9 +221,9 @@ export class CardLadderSheet extends Sheet {
   private readonly NAME_COL = 3 // Player's name
   private readonly RATING_COL = 4 // Player's average rating
   private readonly SCRIPT_RATING_COL = 5 // First rating column managed by this script
-  private readonly NUM_SCRIPT_RATING_COLS = 6 // Number of consecutive rating columns managed by this script
+  private readonly NUM_SCRIPT_RATING_COLS = 4 // Number of consecutive rating columns managed by this script
   private readonly POST_RATING_COL = 11 // First column after ratings that is managed by this script
-  private readonly NUM_POST_RATING_COLS = CARD_LADDER_ROW_LENGTH - this.POST_RATING_COL + 1
+  private readonly NUM_POST_RATING_COLS = 1
 
   /** Read all player entries from the ladder */
   readLadder (): CardLadderRow[] {
@@ -279,11 +279,8 @@ export class CardLadderSheet extends Sheet {
     // We need to manually compute average scores for the FP and SP sides
     nameRange.setValues(ladder.originalEntries.map((entry) => [entry.name]))
     ratingsRange.setValues(
-      ladder.originalEntries.map(
-        (entry) =>
-          entry.row
-            .slice(this.SCRIPT_RATING_COL - 1, this.SCRIPT_RATING_COL - 1 + 4) // Individual role ratings
-            .concat([entry.getSideRating('Free'), entry.getSideRating('Shadow')]) // Side average ratings
+      ladder.originalEntries.map((entry) =>
+        entry.row.slice(this.SCRIPT_RATING_COL - 1, this.SCRIPT_RATING_COL - 1 + this.NUM_SCRIPT_RATING_COLS)
       )
     )
     postRatingsRange.setValues(
