@@ -9,7 +9,7 @@
  */
 import { unionParser, createTypeGuard } from './types'
 
-const EXPANSION = ['Base', 'LoME', 'WoME', 'LoME+WoME'] as const
+const EXPANSION = ['Base', 'LoME', 'WoME', 'LoME+WoME', 'KoME', 'KoME+LoME', 'KoME+WoME', 'KoME+LoME+WoME'] as const
 const isExpansion = createTypeGuard(unionParser(EXPANSION))
 export type Expansion = (typeof EXPANSION)[number]
 
