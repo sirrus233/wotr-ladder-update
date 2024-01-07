@@ -32,6 +32,7 @@ const COMPETITIVE = [
   'Ladder and league (lome)',
   'Ladder and league (TTS)',
   'Ladder and league (wome)',
+  'Ladder and league (super)',
   'Ladder but I cannot remember the stats'
 ] as const
 const isCompetitive = createTypeGuard(unionParser(COMPETITIVE))
