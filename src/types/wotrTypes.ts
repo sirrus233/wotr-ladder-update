@@ -65,7 +65,7 @@ export type WotrReportRow = [
   mordorTrack: number,
   aragorn: number,
   treebeard: TickBox,
-  eyes: number,
+  eyes: number | '4+',
   rivendell: TickBox,
   greyHavens: TickBox,
   shire: TickBox,
@@ -155,7 +155,7 @@ export function parseWotrReportRow (val: unknown): WotrReportRow {
   if (!isTickBox(val[16])) {
     throw new Error(`Error in game report at field [16]. Expected TickBox. Got ${typeof val[16]}.\n${valStr}`)
   }
-  if (typeof val[17] !== 'number') {
+  if (typeof val[17] !== 'number' && val[17] !== '4+') {
     throw new Error(`Error in game report at field [17]. Expected 'number'. Got ${typeof val[17]}.\n${valStr}`)
   }
   if (!isTickBox(val[18])) {
