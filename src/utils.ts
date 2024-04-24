@@ -1,5 +1,7 @@
 /** Library of helper functions that don't quite fit anywhere else. **/
 
+import { WotrReport } from './objects'
+
 /**
  * Given a list of numbers describing the right-most boundaries (inclusive) of a set of partitions, a list of values
  * contained in those partitions, and a lookup key, return the value contained in the partition specified by the key.
@@ -38,4 +40,14 @@ export function computeEloDiff (winnerRating: number, loserRating: number): numb
   const scoreAdjustments = winnerRating < loserRating ? WINNER_LOWER : WINNER_HIGHER
   const scoreDiff = Math.abs(winnerRating - loserRating)
   return getPartitionedValue(scoreDiff, SCORE_BUCKETS, scoreAdjustments)
+}
+
+/**
+ * Given a game report, compute a normalized name in the format of: <date>_<fp>_vs_<sp>.log
+ */
+export function getNormalizedLogName (report: WotrReport): string {
+  const timeString = report.timestamp.toString().split(' GMT')[0]
+  const freePlayer = report.winningSide() === 'Free' ? report.winner : report.loser
+  const shadowPlayer = report.winningSide() === 'Shadow' ? report.winner : report.loser
+  return [timeString, freePlayer, 'vs', shadowPlayer].join('_') + '.log'
 }

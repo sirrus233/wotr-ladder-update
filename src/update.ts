@@ -10,6 +10,7 @@ import {
   CardReportSheet,
   CardLadderSheet
 } from './sheets'
+import { getNormalizedLogName } from './utils'
 
 /** Process reports and update ladder for War of the Ring board game. */
 export function updateWotrLadder (): void {
@@ -25,6 +26,17 @@ export function updateWotrLadder (): void {
   const ladderEntries = ladderSheet.readLadder().map((row) => new WotrLadderEntry(row))
   const originalPlayerCount = ladderEntries.length
   const ladder = new WotrLadder(ladderEntries)
+
+  // Rename log files
+  console.log('Normalizing log file names...')
+  reports.forEach((report) => {
+    // Links are optional, so only rename files when one exists.
+    if (report.link !== '') {
+      const fileId = report.link.split('id=')[1]
+      const file = DriveApp.getFileById(fileId)
+      file.setName(getNormalizedLogName(report))
+    }
+  })
 
   // Process all the ladder games in the batch
   console.log('Processing games...')
