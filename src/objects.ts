@@ -11,8 +11,6 @@ import { CardCompetitive, CardLadderRow, CardReportRow, CardRole, CardSide, Card
 export class WotrReport {
   /** The report as read from the spreadsheet in Array/Tuple form. */
   row: WotrReportRow
-  /** When the game was reported. */
-  timestamp: Date
   /** Name of the winner. */
   winner: string
   /** Name of the loser. */
@@ -21,19 +19,15 @@ export class WotrReport {
   victory: WotrVictory
   /** Whether or not the game was competitive/friendly. */
   competitive: WotrCompetitive
-  /** Download link for the game report. */
-  link: string
   /** Annotation data for ladder managers. Initialized to a default state, and updated when this report is processed. */
   annotation: Annotation = [0, 0, 0, 0, 0, 0, 0, 0]
 
   constructor (row: WotrReportRow) {
     this.row = row
-    this.timestamp = row[0]
     this.winner = row[2]
     this.loser = row[3]
     this.victory = row[5]
     this.competitive = row[6]
-    this.link = row[33]
   }
 
   /** Was this game played competitively */
