@@ -10,6 +10,7 @@ import {
   CardReportSheet,
   CardLadderSheet
 } from './sheets'
+import { getNormalizedLogName } from './utils'
 
 /** Process reports and update ladder for War of the Ring board game. */
 export function updateWotrLadder (): void {
@@ -25,6 +26,22 @@ export function updateWotrLadder (): void {
   const ladderEntries = ladderSheet.readLadder().map((row) => new WotrLadderEntry(row))
   const originalPlayerCount = ladderEntries.length
   const ladder = new WotrLadder(ladderEntries)
+
+  // Rename log files
+  console.log('Normalizing log file names...')
+  const logData = reports.filter((report) => report.link !== '').map((report) => {
+    const fileId = report.link.split('id=')[1]
+    const newName = getNormalizedLogName(report)
+    return { fileId, newName }
+  })
+  const url = 'https://us-central1-war-of-the-ring-community.cloudfunctions.net/rename_logfiles'
+  const method = 'post' as GoogleAppsScript.URL_Fetch.HttpMethod
+  const contentType = 'application/json'
+  const headers = { Authorization: 'Bearer ' + ScriptApp.getIdentityToken() }
+  const payload = JSON.stringify({ logData })
+  const options = { method, contentType, headers, payload, muteHttpExceptions: true }
+  const response = UrlFetchApp.fetch(url, options)
+  console.log(response.getContentText())
 
   // Process all the ladder games in the batch
   console.log('Processing games...')
