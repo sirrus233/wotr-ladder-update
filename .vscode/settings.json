@@ -1,31 +1,43 @@
 {
-  "cSpell.words": [
-    "Amroth",
-    "angmar",
-    "aragorn",
-    "barad",
-    "dwarven",
-    "edoras",
-    "Erebor",
-    "ered",
-    "Guldur",
-    "Gundabad",
-    "Harad",
-    "lorien",
-    "Luin",
-    "minas",
-    "morannon",
-    "mordor",
-    "Morgul",
-    "moria",
-    "orthanc",
-    "pelargir",
-    "Rhun",
-    "rivendell",
-    "saruman",
-    "Tirith",
-    "treebeard",
-    "umbar",
-    "wotr"
-  ]
+    "cSpell.words": [
+        "Amroth",
+        "angmar",
+        "aragorn",
+        "barad",
+        "dwarven",
+        "edoras",
+        "Erebor",
+        "ered",
+        "googleapiclient",
+        "Guldur",
+        "Gundabad",
+        "Harad",
+        "logfiles",
+        "lorien",
+        "Luin",
+        "minas",
+        "morannon",
+        "mordor",
+        "Morgul",
+        "moria",
+        "orthanc",
+        "pelargir",
+        "Rhun",
+        "rivendell",
+        "saruman",
+        "Tirith",
+        "treebeard",
+        "umbar",
+        "wotr"
+    ],
+
+    "material-icon-theme.folders.associations": {
+        "apps_script": "scripts",
+        "cloud_functions/rename_logfiles": "functions"
+    },
+
+    "eslint.workingDirectories": ["./apps_script"],
+
+    "python.venvPath": "./cloud_functions/rename_logfiles/.venv",
+    "python.analysis.stubPath": "./cloud_functions/rename_logfiles/typings"
 }

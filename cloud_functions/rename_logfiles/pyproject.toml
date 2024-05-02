@@ -1,0 +1,28 @@
+[tool.poetry]
+authors = ["Bradley Sherman <sirrus233@gmail.com>"]
+description = "Rename uploaded logfiles into a standard format."
+name = "rename-logfiles"
+package-mode = false
+readme = "README.md"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+Flask = "^3.0.3"
+functions-framework = "^3.6.0"
+google-api-python-client = "^2.127.0"
+google-auth = "^2.29.0"
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+pyright = "^1.1.360"
+ruff = "^0.4.2"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+
+[tool.ruff]
+exclude = ["./typings/*"]
+ignore = ["D", "FIX002", "TD"]
+select = ["ALL"]
+target-version = "py312"
