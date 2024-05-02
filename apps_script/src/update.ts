@@ -39,7 +39,8 @@ export function updateWotrLadder (): void {
   const contentType = 'application/json'
   const headers = { Authorization: 'Bearer ' + ScriptApp.getIdentityToken() }
   const payload = JSON.stringify({ logData })
-  const options = { method, contentType, headers, payload, muteHttpExceptions: true }
+  const muteHttpExceptions = false // A failed rename attempt will throw an exception before reports are processed.
+  const options = { method, contentType, headers, payload, muteHttpExceptions }
   const response = UrlFetchApp.fetch(url, options)
   console.log(response.getContentText())
 
